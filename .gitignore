@@ -1,0 +1,6 @@
+plan.pdf
+env
+.env
+.DS_Store
+run.txt
+backend/__pycache__
