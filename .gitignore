@@ -3,4 +3,6 @@ env
 .env
 .DS_Store
 run.txt
-backend/__pycache__
+__pycache__/
+chroma_db
+repos
