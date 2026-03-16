@@ -32,4 +32,19 @@ class VectorStore:
         )
         return results
 
+    def collection_exists(self, repo_id: str) -> bool:
+        try:
+            # Check if collection exists and has documents
+            collection = self.client.get_collection(name=f"repo_{repo_id}")
+            return collection.count() > 0
+        except Exception:
+            return False
+
+    def get_item_count(self, repo_id: str) -> int:
+        try:
+            collection = self.client.get_collection(name=f"repo_{repo_id}")
+            return collection.count()
+        except Exception:
+            return 0
+
 vector_store = VectorStore()

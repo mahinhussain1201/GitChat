@@ -8,9 +8,14 @@ class RepoService:
     async def process_repository(self, repo_url: str):
         repo_id = get_repo_id(repo_url)
         
-        # Check if already processed
-        # For simplicity, we check if ChromaDB collection has data later or if repo folder exists
-        # In a real app, we'd use a database to track status
+        # Check if already processed and populated in VectorStore
+        if vector_store.collection_exists(repo_id):
+            print(f"Repository {repo_url} already indexed. Skipping ingestion.")
+            return {
+                "repo_id": repo_id,
+                "status": "already_indexed",
+                "chunk_count": vector_store.get_item_count(repo_id)
+            }
         
         # 1. Clone
         repo_path = clone_repository(repo_url)
