@@ -10,5 +10,6 @@ export const repoService = {
     getNonTechSummary: (repoUrl: string) => api.post('/non-tech-summary', { repo_url: repoUrl }),
     getArchitecture: (repoUrl: string) => api.post('/architecture', { repo_url: repoUrl }),
     getSystemDesign: (repoUrl: string) => api.post('/system-design', { repo_url: repoUrl }),
+    getSecurityScan: (repoUrl: string) => api.post('/security-scan', { repo_url: repoUrl }),
     chat: (repoUrl: string, message: string) => api.post('/chat', { repo_url: repoUrl, message }),
 };

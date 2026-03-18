@@ -85,5 +85,13 @@ async def system_design(request: RepoRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/security-scan")
+async def security_scan(request: RepoRequest):
+    try:
+        response = await chat_service.get_security_scan(request.repo_url)
+        return {"status": "success", "security_scan": response}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -34,8 +34,9 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl }) => {
       else if (action === 'business') response = await repoService.getNonTechSummary(repoUrl);
       else if (action === 'arch') response = await repoService.getArchitecture(repoUrl);
       else if (action === 'design') response = await repoService.getSystemDesign(repoUrl);
+      else if (action === 'security') response = await repoService.getSecurityScan(repoUrl);
       
-      const content = response?.data.summary || response?.data.architecture || response?.data.system_design;
+      const content = response?.data.summary || response?.data.architecture || response?.data.system_design || response?.data.security_scan;
       setMessages(prev => [...prev, { role: 'assistant', content: `### ${label}\n\n${content}` }]);
     } catch (error) {
       console.error(error);
@@ -85,6 +86,9 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl }) => {
           </button>
           <button onClick={() => handleAction('design', 'System Design')} className="glass-morphism" style={{ padding: '12px', borderRadius: '8px', color: 'white', textAlign: 'left' }}>
             {activeAnalysis === 'System Design' ? 'Generating...' : '📐 System Design'}
+          </button>
+          <button onClick={() => handleAction('security', 'Security Scan')} className="glass-morphism" style={{ padding: '12px', borderRadius: '8px', color: 'white', textAlign: 'left' }}>
+            {activeAnalysis === 'Security Scan' ? 'Scanning...' : '🛡️ Security Scan'}
           </button>
         </div>
         

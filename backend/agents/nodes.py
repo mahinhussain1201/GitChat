@@ -21,6 +21,7 @@ async def intent_detection_node(state):
     - non_tech_summary: Explicit request for a business overview, product features, or "what is this for" for the WHOLE repo.
     - architecture: Explicit request for directory structure, module layout, or system architecture for the WHOLE repo.
     - system_design: Explicit request for design patterns, infrastructure, or high-level diagrams for the WHOLE repo.
+    - security_scan: Explicit request to check for vulnerabilities, secrets, or security issues.
     - chat: General questions, specific code lookups, or anything else that is NOT a request for a full repository summary.
     
     User Message: "{last_message}"
@@ -30,7 +31,7 @@ async def intent_detection_node(state):
     response = await llm.ainvoke(prompt)
     intent = response.content.strip().lower()
     
-    valid_intents = ["chat", "tech_summary", "non_tech_summary", "architecture", "system_design"]
+    valid_intents = ["chat", "tech_summary", "non_tech_summary", "architecture", "system_design", "security_scan"]
     # Cleanup for cases where LLM returns more than just the word
     for v in valid_intents:
         if v in intent:
@@ -119,5 +120,28 @@ async def system_design_node(state):
     context = "\n---\n".join(results['documents'][0])
     
     prompt = f"Generate a detailed system design explanation for this project based on the code:\n\n{context}"
+    response = await llm.ainvoke(prompt)
+    return {"response": response.content}
+async def security_scan_node(state):
+    import os
+    from backend.tools.security_scanner import run_security_scan
+    
+    repo_id = state["repo_id"]
+    repo_path = os.path.join("repos", repo_id)
+    
+    if not os.path.exists(repo_path):
+        return {"response": "Error: Repository path not found for scanning."}
+        
+    scan_results = run_security_scan(repo_path)
+    
+    prompt = f"""
+    You are a security expert. Analyze the following security scan results and provide a concise, actionable summary.
+    Highlight the most critical findings and suggest fixes.
+    
+    Scan Results:
+    {json.dumps(scan_results, indent=2)}
+    
+    Format the response in a professional security report style using markdown.
+    """
     response = await llm.ainvoke(prompt)
     return {"response": response.content}
