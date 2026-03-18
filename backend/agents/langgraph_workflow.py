@@ -11,7 +11,7 @@ class AgentState(TypedDict):
     retrieved_chunks: List[str]
     intent: str
     response: str
-    analysis_type: str # 'chat', 'tech_summary', 'non_tech_summary', 'architecture', 'system_design', 'security_scan'
+    analysis_type: str # 'chat', 'tech_summary', 'non_tech_summary', 'architecture', 'system_design', 'security_scan', 'code_analysis'
 
 def create_workflow():
     from backend.agents.nodes import (
@@ -22,7 +22,8 @@ def create_workflow():
         non_tech_summary_node,
         architecture_node,
         system_design_node,
-        security_scan_node
+        security_scan_node,
+        code_analysis_node
     )
 
     workflow = StateGraph(AgentState)
@@ -35,6 +36,7 @@ def create_workflow():
     workflow.add_node("architecture", architecture_node)
     workflow.add_node("system_design", system_design_node)
     workflow.add_node("security_scan", security_scan_node)
+    workflow.add_node("code_analysis", code_analysis_node)
 
     workflow.set_entry_point("detect_intent")
 
@@ -52,7 +54,8 @@ def create_workflow():
             "non_tech_summary": "non_tech_summary",
             "architecture": "architecture",
             "system_design": "system_design",
-            "security_scan": "security_scan"
+            "security_scan": "security_scan",
+            "code_analysis": "code_analysis"
         }
     )
 
@@ -63,5 +66,6 @@ def create_workflow():
     workflow.add_edge("architecture", END)
     workflow.add_edge("system_design", END)
     workflow.add_edge("security_scan", END)
+    workflow.add_edge("code_analysis", END)
 
     return workflow.compile()

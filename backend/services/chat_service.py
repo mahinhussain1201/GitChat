@@ -62,3 +62,14 @@ class ChatService:
         }
         result = await self.workflow.ainvoke(state)
         return result["response"]
+
+    async def get_code_analysis(self, repo_url: str):
+        repo_id = get_repo_id(repo_url)
+        state = {
+            "messages": [HumanMessage(content="Run code quality analysis")],
+            "repo_url": repo_url,
+            "repo_id": repo_id,
+            "analysis_type": "code_analysis"
+        }
+        result = await self.workflow.ainvoke(state)
+        return result["response"]

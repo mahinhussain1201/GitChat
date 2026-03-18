@@ -35,8 +35,9 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl }) => {
       else if (action === 'arch') response = await repoService.getArchitecture(repoUrl);
       else if (action === 'design') response = await repoService.getSystemDesign(repoUrl);
       else if (action === 'security') response = await repoService.getSecurityScan(repoUrl);
+      else if (action === 'code') response = await repoService.getCodeAnalysis(repoUrl);
       
-      const content = response?.data.summary || response?.data.architecture || response?.data.system_design || response?.data.security_scan;
+      const content = response?.data.summary || response?.data.architecture || response?.data.system_design || response?.data.security_scan || response?.data.code_analysis;
       setMessages(prev => [...prev, { role: 'assistant', content: `### ${label}\n\n${content}` }]);
     } catch (error) {
       console.error(error);
@@ -66,9 +67,9 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl }) => {
   };
 
   return (
-    <div className="dashboard-container" style={{ display: 'grid', gridTemplateColumns: '300px 1fr', height: '100vh', gap: '1px', background: 'var(--border)' }}>
+    <div className="dashboard-container" style={{ display: 'grid', gridTemplateColumns: '300px 1fr', height: '100vh', width: '100vw', overflow: 'hidden', background: 'var(--border)' }}>
       {/* Sidebar */}
-      <div style={{ background: 'var(--bg-dark)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <div style={{ background: 'var(--bg-dark)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px', height: '100vh', overflowY: 'auto', borderRight: '1px solid var(--border)' }}>
         <h2 className="gradient-text">RepoMind</h2>
         <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', wordBreak: 'break-all', padding: '12px', background: 'var(--bg-card)', borderRadius: '8px' }}>
           {repoUrl}
@@ -90,6 +91,9 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl }) => {
           <button onClick={() => handleAction('security', 'Security Scan')} className="glass-morphism" style={{ padding: '12px', borderRadius: '8px', color: 'white', textAlign: 'left' }}>
             {activeAnalysis === 'Security Scan' ? 'Scanning...' : '🛡️ Security Scan'}
           </button>
+          <button onClick={() => handleAction('code', 'Code Quality')} className="glass-morphism" style={{ padding: '12px', borderRadius: '8px', color: 'white', textAlign: 'left' }}>
+            {activeAnalysis === 'Code Quality' ? 'Analyzing...' : '💎 Code Quality'}
+          </button>
         </div>
         
         <div style={{ marginTop: 'auto', textAlign: 'center' }}>
@@ -103,7 +107,7 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl }) => {
       </div>
 
       {/* Main Chat Area */}
-      <div style={{ background: 'var(--bg-dark)', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ background: 'var(--bg-dark)', display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
         <div style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
           {messages.length === 0 ? (
             <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>

@@ -22,6 +22,7 @@ async def intent_detection_node(state):
     - architecture: Explicit request for directory structure, module layout, or system architecture for the WHOLE repo.
     - system_design: Explicit request for design patterns, infrastructure, or high-level diagrams for the WHOLE repo.
     - security_scan: Explicit request to check for vulnerabilities, secrets, or security issues.
+    - code_analysis: Explicit request to check code quality, smells, duplicates, or bad practices.
     - chat: General questions, specific code lookups, or anything else that is NOT a request for a full repository summary.
     
     User Message: "{last_message}"
@@ -31,7 +32,7 @@ async def intent_detection_node(state):
     response = await llm.ainvoke(prompt)
     intent = response.content.strip().lower()
     
-    valid_intents = ["chat", "tech_summary", "non_tech_summary", "architecture", "system_design", "security_scan"]
+    valid_intents = ["chat", "tech_summary", "non_tech_summary", "architecture", "system_design", "security_scan", "code_analysis"]
     # Cleanup for cases where LLM returns more than just the word
     for v in valid_intents:
         if v in intent:
@@ -142,6 +143,38 @@ async def security_scan_node(state):
     {json.dumps(scan_results, indent=2)}
     
     Format the response in a professional security report style using markdown.
+    """
+    response = await llm.ainvoke(prompt)
+    return {"response": response.content}
+
+async def code_analysis_node(state):
+    import os
+    from backend.tools.code_analyzer import run_code_analysis
+    
+    repo_id = state["repo_id"]
+    repo_path = os.path.join("repos", repo_id)
+    
+    if not os.path.exists(repo_path):
+        return {"response": "Error: Repository path not found for analysis."}
+        
+    analysis_results = run_code_analysis(repo_path)
+    
+    prompt = f"""
+    You are a code quality expert. Analyze the following code quality scan results and provide a professional, constructive report.
+    Identify the most critical code smells, bad practices, and duplicate code blocks.
+    Suggest improvements and refactoring strategies.
+    
+    Scan Results:
+    {json.dumps(analysis_results, indent=2)}
+    
+    Format the response in a professional code quality report style using markdown.
+    Include sections for:
+    - Summary of Findings
+    - Unused Imports
+    - Code Smells (Long Functions, Excessive Arguments)
+    - Duplicate Code
+    - Bad Practices
+    - Recommendations
     """
     response = await llm.ainvoke(prompt)
     return {"response": response.content}
