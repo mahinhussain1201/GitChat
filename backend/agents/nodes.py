@@ -9,21 +9,23 @@ llm = ChatGroq(api_key=settings.GROQ_API_KEY, model_name=settings.LLM_MODEL_NAME
 async def intent_detection_node(state):
     last_message = state["messages"][-1].content
     
-    if state.get("analysis_type") and state["analysis_type"] != "chat":
+    # If the user is already in a specific analysis flow (summary, architecture, etc.), keep it.
+    # However, if it's 'chat', we'll re-evaluate if they are asking for a summary explicitly.
+    if state.get("analysis_type") and state["analysis_type"] not in ["chat", None]:
         return {"intent": state["analysis_type"]}
     
     prompt = f"""
     Analyze the user message and determine the primary intent.
     Possible intents:
-    - tech_summary: Request for a deep technical breakdown, developer overview, or "how it works".
-    - non_tech_summary: Request for a business overview, product features, or "what is this for".
-    - architecture: Request for directory structure, module layout, or system architecture.
-    - system_design: Request for design patterns, infrastructure, or high-level diagrams.
-    - chat: General questions, specific code lookups, or anything else.
+    - tech_summary: Explicit request for a full technical breakdown, developer overview, or "how it works" for the WHOLE repo.
+    - non_tech_summary: Explicit request for a business overview, product features, or "what is this for" for the WHOLE repo.
+    - architecture: Explicit request for directory structure, module layout, or system architecture for the WHOLE repo.
+    - system_design: Explicit request for design patterns, infrastructure, or high-level diagrams for the WHOLE repo.
+    - chat: General questions, specific code lookups, or anything else that is NOT a request for a full repository summary.
     
     User Message: "{last_message}"
     
-    Return ONLY one of the intent strings.
+    Return ONLY one of the intent strings. Default to 'chat' if it's a specific question or concept inquiry.
     """
     response = await llm.ainvoke(prompt)
     intent = response.content.strip().lower()
@@ -55,18 +57,24 @@ async def chat_node(state):
     prompt = f"""
     You are RepoMind AI, an expert software architect with deep knowledge of the provided codebase.
     
-    STRICT RULES:
-    1. Base your answer ONLY on the provided codebase context.
-    2. If the context does not contain the answer, say "I don't have enough information in the provided context to answer that precisely."
-    3. Do NOT provide general programming definitions unless they are directly relevant to explaining the specific implementation in this code.
-    4. When referring to files, use the relative paths provided in the context.
+    Your goal is to provide a hybrid response that combines your general programming knowledge with specific details from the repository.
     
-    Context:
+    STRICT RULES:
+    1. If the question is about a specific implementation in this repo, use the provided context.
+    2. If the user asks about a general programming concept (e.g., "What is a decorator?", "How does React work?"):
+        - Explain the concept accurately using your own internal knowledge.
+        - SEARCH the provided context to see if this concept is used in the repository.
+        - If found, provide examples/references to files in this repo where the concept is used.
+        - If NOT found, explicitly state: "This concept does not appear to be used in the current repository."
+    3. When referring to files, always use the relative paths provided in the context.
+    4. If you are unsure and the context doesn't help, be honest and state what you know and what is missing from the repo.
+    
+    Context from Repository:
     {context}
     
     Question: {last_message}
     
-    Answer concisely and technically.
+    Answer concisely, technically, and helpfully.
     """
     response = await llm.ainvoke(prompt)
     return {"messages": [AIMessage(content=response.content)], "response": response.content}
