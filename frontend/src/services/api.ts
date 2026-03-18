@@ -12,5 +12,6 @@ export const repoService = {
     getSystemDesign: (repoUrl: string) => api.post('/system-design', { repo_url: repoUrl }),
     getSecurityScan: (repoUrl: string) => api.post('/security-scan', { repo_url: repoUrl }),
     getCodeAnalysis: (repoUrl: string) => api.post('/code-analysis', { repo_url: repoUrl }),
+    getComplexityAnalysis: (repoUrl: string) => api.post('/complexity-analysis', { repo_url: repoUrl }),
     chat: (repoUrl: string, message: string) => api.post('/chat', { repo_url: repoUrl, message }),
 };

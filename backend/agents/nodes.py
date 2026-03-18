@@ -23,6 +23,7 @@ async def intent_detection_node(state):
     - system_design: Explicit request for design patterns, infrastructure, or high-level diagrams for the WHOLE repo.
     - security_scan: Explicit request to check for vulnerabilities, secrets, or security issues.
     - code_analysis: Explicit request to check code quality, smells, duplicates, or bad practices.
+    - complexity_analysis: Explicit request to check repository complexity, heatmap, and scoring.
     - chat: General questions, specific code lookups, or anything else that is NOT a request for a full repository summary.
     
     User Message: "{last_message}"
@@ -32,7 +33,7 @@ async def intent_detection_node(state):
     response = await llm.ainvoke(prompt)
     intent = response.content.strip().lower()
     
-    valid_intents = ["chat", "tech_summary", "non_tech_summary", "architecture", "system_design", "security_scan", "code_analysis"]
+    valid_intents = ["chat", "tech_summary", "non_tech_summary", "architecture", "system_design", "security_scan", "code_analysis", "complexity_analysis"]
     # Cleanup for cases where LLM returns more than just the word
     for v in valid_intents:
         if v in intent:
@@ -175,6 +176,42 @@ async def code_analysis_node(state):
     - Duplicate Code
     - Bad Practices
     - Recommendations
+    """
+    response = await llm.ainvoke(prompt)
+    return {"response": response.content}
+
+async def complexity_analysis_node(state):
+    import os
+    from backend.tools.complexity_analyzer import run_complexity_analysis
+    
+    repo_id = state["repo_id"]
+    repo_path = os.path.join("repos", repo_id)
+    
+    if not os.path.exists(repo_path):
+        return {"response": "Error: Repository path not found for analysis."}
+        
+    analysis_results = run_complexity_analysis(repo_path)
+    
+    prompt = f"""
+    You are a senior software architect and complexity expert.
+    Analyze the following complexity scan results and provide a comprehensive report.
+    
+    CRITICAL REQUIREMENTS:
+    1. Show the "Complexity Score: {analysis_results['final_score']} / 100" at the very top.
+    2. Generate the File Heatmap as requested (File Path -> Color Emoji -> Score).
+    3. List the top 10 most complex functions with details.
+    4. Provide architecture style identification, anti-patterns, and scalability concerns.
+    
+    Analysis Results:
+    {json.dumps(analysis_results, indent=2)}
+    
+    Format the response:
+    1. Start with "Complexity Score: {analysis_results['final_score']} / 100" (Large heading).
+    2. Provide a "Technical Health Check" section with scores for Logic Flow, Structural Health, and Logic Density.
+    3. Include the File Heatmap and top 10 functions.
+    4. Conclude with Architecture and Anti-patterns.
+    
+    Ensure all metrics are interpreted as scores out of 100 where higher is better health.
     """
     response = await llm.ainvoke(prompt)
     return {"response": response.content}

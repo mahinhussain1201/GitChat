@@ -5,6 +5,7 @@ import { repoService } from './services/api';
 
 const App: React.FC = () => {
   const [analyzedRepo, setAnalyzedRepo] = useState<string | null>(null);
+  const [complexityData, setComplexityData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -12,7 +13,8 @@ const App: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      await repoService.analyzeRepo(url);
+      const response = await repoService.analyzeRepo(url);
+      setComplexityData(response.data.complexity || response.data.data?.complexity);
       setAnalyzedRepo(url);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to analyze repository. Please check the URL and try again.');
@@ -50,7 +52,7 @@ const App: React.FC = () => {
       {!analyzedRepo ? (
         <LandingPage onAnalyze={handleAnalyze} isLoading={isLoading} />
       ) : (
-        <Dashboard repoUrl={analyzedRepo} />
+        <Dashboard repoUrl={analyzedRepo} complexityData={complexityData} />
       )}
     </div>
   );

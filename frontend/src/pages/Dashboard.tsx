@@ -4,6 +4,7 @@ import { repoService } from '../services/api';
 
 interface DashboardProps {
   repoUrl: string;
+  complexityData?: any;
 }
 
 interface Message {
@@ -11,11 +12,12 @@ interface Message {
   content: string;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ repoUrl }) => {
+const Dashboard: React.FC<DashboardProps> = ({ repoUrl, complexityData }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isChatting, setIsChatting] = useState(false);
   const [activeAnalysis, setActiveAnalysis] = useState<string | null>(null);
+  const [showBreakup, setShowBreakup] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -47,6 +49,12 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl }) => {
     }
   };
 
+  const getScoreColor = (score: number) => {
+    if (score < 30) return '#10b981'; // Green
+    if (score < 60) return '#f59e0b'; // Yellow
+    return '#ef4444'; // Red
+  };
+
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isChatting) return;
@@ -70,7 +78,82 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl }) => {
     <div className="dashboard-container" style={{ display: 'grid', gridTemplateColumns: '300px 1fr', height: '100vh', width: '100vw', overflow: 'hidden', background: 'var(--border)' }}>
       {/* Sidebar */}
       <div style={{ background: 'var(--bg-dark)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px', height: '100vh', overflowY: 'auto', borderRight: '1px solid var(--border)' }}>
-        <h2 className="gradient-text">RepoMind</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 className="gradient-text">RepoMind</h2>
+            {complexityData && (
+                <div 
+                    onClick={() => setShowBreakup(!showBreakup)}
+                    style={{ 
+                        position: 'relative',
+                        width: '50px', 
+                        height: '50px', 
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s',
+                    }}
+                    title="Click to see complexity breakup"
+                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                    <svg width="50" height="50" style={{ position: 'absolute', top: 0, left: 0 }}>
+                        <circle
+                            cx="25"
+                            cy="25"
+                            r="20"
+                            fill="none"
+                            stroke="var(--border)"
+                            strokeWidth="4"
+                        />
+                        <circle
+                            cx="25"
+                            cy="25"
+                            r="20"
+                            fill="none"
+                            stroke={getScoreColor(complexityData?.final_score || 0)}
+                            strokeWidth="4"
+                            strokeDasharray={`${((complexityData?.final_score || 0) / 100) * 125.6} 125.6`}
+                            strokeLinecap="round"
+                            transform="rotate(-90 25 25)"
+                            style={{ transition: 'stroke-dasharray 0.5s ease' }}
+                        />
+                    </svg>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>{complexityData?.final_score || 0}</span>
+                </div>
+            )}
+        </div>
+
+        {showBreakup && complexityData && complexityData.details && (
+            <div className="animate-fade-in" style={{ 
+                background: 'var(--bg-card)', 
+                padding: '16px', 
+                borderRadius: '12px', 
+                fontSize: '0.8rem',
+                border: '1px solid var(--border)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+            }}>
+                <h4 style={{ margin: 0, color: 'var(--accent)', fontSize: '0.9rem' }}>Technical Health Check</h4>
+                {Object.entries(complexityData.details).map(([key, value]: [string, any]) => {
+                    const normalizedValue = value || 0;
+                    return (
+                        <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span style={{ color: 'var(--text-secondary)' }}>{key}</span>
+                                <span style={{ color: getScoreColor(100 - normalizedValue), fontWeight: '600' }}>{normalizedValue}/100</span>
+                            </div>
+                            <div style={{ height: '4px', background: 'var(--border)', borderRadius: '2px', overflow: 'hidden' }}>
+                                <div style={{ width: `${normalizedValue}%`, height: '100%', background: getScoreColor(100 - normalizedValue) }} />
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        )}
+
         <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', wordBreak: 'break-all', padding: '12px', background: 'var(--bg-card)', borderRadius: '8px' }}>
           {repoUrl}
         </div>

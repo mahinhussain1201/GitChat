@@ -73,3 +73,14 @@ class ChatService:
         }
         result = await self.workflow.ainvoke(state)
         return result["response"]
+
+    async def get_complexity_analysis(self, repo_url: str):
+        repo_id = get_repo_id(repo_url)
+        state = {
+            "messages": [HumanMessage(content="Run complexity analysis")],
+            "repo_url": repo_url,
+            "repo_id": repo_id,
+            "analysis_type": "complexity_analysis"
+        }
+        result = await self.workflow.ainvoke(state)
+        return result["response"]

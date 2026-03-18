@@ -11,10 +11,15 @@ class RepoService:
         # Check if already processed and populated in VectorStore
         if vector_store.collection_exists(repo_id):
             print(f"Repository {repo_url} already indexed. Skipping ingestion.")
+            repo_path = os.path.join("repos", repo_id)
+            from backend.tools.complexity_analyzer import run_complexity_analysis
+            complexity_results = run_complexity_analysis(repo_path)
+            
             return {
                 "repo_id": repo_id,
                 "status": "already_indexed",
-                "chunk_count": vector_store.get_item_count(repo_id)
+                "chunk_count": vector_store.get_item_count(repo_id),
+                "complexity": complexity_results
             }
         
         # 1. Clone
@@ -29,8 +34,13 @@ class RepoService:
         # 4. Store
         vector_store.add_chunks(repo_id, chunks)
         
+        # 5. Complexity Analysis
+        from backend.tools.complexity_analyzer import run_complexity_analysis
+        complexity_results = run_complexity_analysis(repo_path)
+        
         return {
             "repo_id": repo_id,
             "file_count": len(files),
-            "chunk_count": len(chunks)
+            "chunk_count": len(chunks),
+            "complexity": complexity_results
         }
