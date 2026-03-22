@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
@@ -53,6 +54,18 @@ async def chat(request: ChatRequest):
         response = await chat_service.chat(request.repo_url, request.message)
         return {"status": "success", "response": response}
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/chat-stream")
+async def chat_stream(request: ChatRequest):
+    try:
+        return StreamingResponse(
+            chat_service.stream_chat(request.repo_url, request.message),
+            media_type="text/event-stream"
+        )
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/tech-summary")

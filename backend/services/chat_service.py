@@ -16,6 +16,30 @@ class ChatService:
         }
         result = await self.workflow.ainvoke(state)
         return result["response"]
+
+    async def stream_chat(self, repo_url: str, message: str):
+        repo_id = get_repo_id(repo_url)
+        state = {
+            "messages": [HumanMessage(content=message)],
+            "repo_url": repo_url,
+            "repo_id": repo_id,
+            "analysis_type": "chat"
+        }
+        
+        async for event in self.workflow.astream_events(state, version="v2"):
+            kind = event["event"]
+            node = event.get("metadata", {}).get("langgraph_node", "")
+            
+            allowed_nodes = [
+                "chat", "tech_summary", "non_tech_summary", 
+                "architecture", "system_design", "security_scan", 
+                "code_analysis", "complexity_analysis"
+            ]
+            
+            if kind == "on_chat_model_stream" and node in allowed_nodes:
+                content = event["data"]["chunk"].content
+                if content:
+                    yield content
     
     async def get_summary(self, repo_url: str, type: str = "technical"):
         repo_id = get_repo_id(repo_url)

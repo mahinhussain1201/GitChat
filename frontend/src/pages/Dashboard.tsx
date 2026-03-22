@@ -79,11 +79,42 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl, complexityData }) => {
     setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
     setIsChatting(true);
 
+    // Placeholder for assistant message
+    setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+
     try {
-      const response = await repoService.chat(repoUrl, userMsg);
-      setMessages(prev => [...prev, { role: 'assistant', content: response.data.response }]);
+      const response = await fetch('http://127.0.0.1:8000/chat-stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ repo_url: repoUrl, message: userMsg })
+      });
+
+      if (!response.ok) throw new Error('Stream request failed');
+      
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let assistantResponse = '';
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          const chunk = decoder.decode(value);
+          assistantResponse += chunk;
+          
+          setMessages(prev => {
+            const last = prev[prev.length - 1];
+            if (last.role === 'assistant') {
+              return [...prev.slice(0, -1), { ...last, content: assistantResponse }];
+            }
+            return prev;
+          });
+        }
+      }
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', content: '❌ Failed to get response.' }]);
+      console.error('Chat error:', error);
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' }]);
     } finally {
       setIsChatting(false);
     }
