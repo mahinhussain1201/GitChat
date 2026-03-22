@@ -65,9 +65,9 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl, complexityData }) => {
   };
 
   const getScoreColor = (score: number) => {
-    if (score < 30) return '#10b981'; // Green
-    if (score < 60) return '#f59e0b'; // Yellow
-    return '#ef4444'; // Red
+    // 0 is red (hue 0), 100 is green (hue 120)
+    const hue = Math.min(120, Math.max(0, score * 1.2));
+    return `hsl(${hue}, 70%, 50%)`;
   };
 
   const handleSend = async (e: React.FormEvent) => {
