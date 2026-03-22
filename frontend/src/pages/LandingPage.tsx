@@ -7,6 +7,13 @@ interface LandingPageProps {
 
 const LandingPage: React.FC<LandingPageProps> = ({ onAnalyze, isLoading }) => {
   const [url, setUrl] = useState('');
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
+
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,17 +30,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onAnalyze, isLoading }) => {
       justifyContent: 'center',
       minHeight: '80vh',
       textAlign: 'center',
-      padding: '0 20px'
+      padding: isMobile ? '40px 20px' : '0 20px'
     }}>
       <div className={isLoading ? "animate-pulse" : ""} style={{ marginBottom: '1rem' }}>
-        <h1 style={{ fontSize: '4.5rem', margin: 0 }} className="gradient-text">
+        <h1 style={{ fontSize: isMobile ? '3rem' : '4.5rem', margin: 0 }} className="gradient-text">
           RepoMind
         </h1>
       </div>
       
       {!isLoading ? (
         <>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1.25rem', marginBottom: '3rem', maxWidth: '600px' }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: isMobile ? '1rem' : '1.25rem', marginBottom: '2rem', maxWidth: '600px' }}>
             Unlock AI-powered insights from any GitHub repository. 
             Analyze codebases, chat with files, and understand complex architectures instantly.
           </p>
@@ -44,6 +51,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onAnalyze, isLoading }) => {
             padding: '8px',
             borderRadius: '16px',
             display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
             gap: '8px'
           }}>
             <input
@@ -82,7 +90,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onAnalyze, isLoading }) => {
         <div className="glass-morphism" style={{ 
           width: '100%', 
           maxWidth: '500px', 
-          padding: '40px', 
+          padding: isMobile ? '24px' : '40px', 
           borderRadius: '24px',
           display: 'flex',
           flexDirection: 'column',
@@ -91,32 +99,39 @@ const LandingPage: React.FC<LandingPageProps> = ({ onAnalyze, isLoading }) => {
         }}>
           <div className="animate-spin-slow" style={{ 
             fontSize: '3rem', 
-            width: '80px', 
-            height: '80px', 
+            width: '60px', 
+            height: '60px', 
             border: '4px solid var(--border)', 
             borderTopColor: 'var(--primary)', 
             borderRadius: '50%' 
           }} />
           <div>
-            <h2 style={{ marginBottom: '8px' }}>Analyzing Repository</h2>
-            <p style={{ color: 'var(--text-secondary)' }}>Cloning, Filtering, and Indexing code chunks...</p>
+            <h2 style={{ fontSize: isMobile ? '1.25rem' : '1.5rem', marginBottom: '8px' }}>Analyzing Repository</h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Cloning, Filtering, and Indexing code chunks...</p>
           </div>
           <div className="loading-bar" style={{ width: '100%' }} />
         </div>
       )}
       
-      <div style={{ marginTop: '4rem', display: 'flex', gap: '40px', opacity: isLoading ? 0.3 : 1, transition: 'opacity 0.5s' }}>
+      <div style={{ 
+        marginTop: '4rem', 
+        display: 'flex', 
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: isMobile ? '24px' : '40px', 
+        opacity: isLoading ? 0.3 : 1, 
+        transition: 'opacity 0.5s' 
+      }}>
         <div style={{ textAlign: 'center' }}>
-          <h3 style={{ fontSize: '1.5rem', color: 'var(--accent)' }}>800</h3>
-          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Token Chunks</p>
+          <h3 style={{ fontSize: '1.25rem', color: 'var(--accent)' }}>800</h3>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Token Chunks</p>
         </div>
         <div style={{ textAlign: 'center' }}>
-          <h3 style={{ fontSize: '1.5rem', color: 'var(--accent)' }}>Llama 3.1</h3>
-          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Reasoning Engine</p>
+          <h3 style={{ fontSize: '1.25rem', color: 'var(--accent)' }}>Llama 3.1</h3>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Reasoning Engine</p>
         </div>
         <div style={{ textAlign: 'center' }}>
-          <h3 style={{ fontSize: '1.5rem', color: 'var(--accent)' }}>ChromaDB</h3>
-          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Vector Engine</p>
+          <h3 style={{ fontSize: '1.25rem', color: 'var(--accent)' }}>ChromaDB</h3>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Vector Engine</p>
         </div>
       </div>
     </div>

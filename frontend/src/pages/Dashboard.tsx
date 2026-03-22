@@ -18,7 +18,22 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl, complexityData }) => {
   const [isChatting, setIsChatting] = useState(false);
   const [activeAnalysis, setActiveAnalysis] = useState<string | null>(null);
   const [showBreakup, setShowBreakup] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (!mobile) setIsSidebarOpen(true);
+      else setIsSidebarOpen(false);
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Initial check
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -75,53 +90,86 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl, complexityData }) => {
   };
 
   return (
-    <div className="dashboard-container" style={{ display: 'grid', gridTemplateColumns: '300px 1fr', height: '100vh', width: '100vw', overflow: 'hidden', background: 'var(--border)' }}>
+    <div className="dashboard-container" style={{ 
+      display: 'flex', 
+      height: '100vh', 
+      width: '100vw', 
+      overflow: 'hidden', 
+      background: 'var(--border)',
+      position: 'relative'
+    }}>
+      {/* Sidebar Overlay */}
+      {isMobile && isSidebarOpen && (
+        <div 
+          onClick={() => setIsSidebarOpen(false)}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'rgba(0,0,0,0.5)',
+            zIndex: 40,
+            backdropFilter: 'blur(4px)'
+          }}
+        />
+      )}
+
       {/* Sidebar */}
-      <div style={{ background: 'var(--bg-dark)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px', height: '100vh', overflowY: 'auto', borderRight: '1px solid var(--border)' }}>
+      <div style={{ 
+        background: 'var(--bg-dark)', 
+        padding: '24px', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: '24px', 
+        height: '100vh', 
+        overflowY: 'auto', 
+        borderRight: '1px solid var(--border)',
+        width: isMobile ? '280px' : '300px',
+        position: isMobile ? 'absolute' : 'relative',
+        left: isMobile && !isSidebarOpen ? '-280px' : '0',
+        zIndex: 50,
+        transition: 'left 0.3s ease'
+      }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h2 className="gradient-text">RepoMind</h2>
-            {complexityData && (
-                <div 
-                    onClick={() => setShowBreakup(!showBreakup)}
-                    style={{ 
-                        position: 'relative',
-                        width: '50px', 
-                        height: '50px', 
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        transition: 'transform 0.2s',
-                    }}
-                    title="Click to see complexity breakup"
-                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                >
-                    <svg width="50" height="50" style={{ position: 'absolute', top: 0, left: 0 }}>
-                        <circle
-                            cx="25"
-                            cy="25"
-                            r="20"
-                            fill="none"
-                            stroke="var(--border)"
-                            strokeWidth="4"
-                        />
-                        <circle
-                            cx="25"
-                            cy="25"
-                            r="20"
-                            fill="none"
-                            stroke={getScoreColor(complexityData?.final_score || 0)}
-                            strokeWidth="4"
-                            strokeDasharray={`${((complexityData?.final_score || 0) / 100) * 125.6} 125.6`}
-                            strokeLinecap="round"
-                            transform="rotate(-90 25 25)"
-                            style={{ transition: 'stroke-dasharray 0.5s ease' }}
-                        />
-                    </svg>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>{complexityData?.final_score || 0}</span>
-                </div>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                {complexityData && (
+                    <div 
+                        onClick={() => setShowBreakup(!showBreakup)}
+                        style={{ 
+                            position: 'relative',
+                            width: '40px', 
+                            height: '40px', 
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                        }}
+                    >
+                        <svg width="40" height="40" style={{ position: 'absolute', top: 0, left: 0 }}>
+                            <circle cx="20" cy="20" r="16" fill="none" stroke="var(--border)" strokeWidth="3" />
+                            <circle
+                                cx="20"
+                                cy="20"
+                                r="16"
+                                fill="none"
+                                stroke={getScoreColor(complexityData?.final_score || 0)}
+                                strokeWidth="3"
+                                strokeDasharray={`${((complexityData?.final_score || 0) / 100) * 100.5} 100.5`}
+                                strokeLinecap="round"
+                                transform="rotate(-90 20 20)"
+                            />
+                        </svg>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>{complexityData?.final_score || 0}</span>
+                    </div>
+                )}
+                {isMobile && (
+                    <button 
+                        onClick={() => setIsSidebarOpen(false)}
+                        style={{ background: 'transparent', border: 'none', color: 'white', fontSize: '1.5rem' }}
+                    >
+                        ✕
+                    </button>
+                )}
+            </div>
         </div>
 
         {showBreakup && complexityData && complexityData.details && (
@@ -129,14 +177,13 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl, complexityData }) => {
                 background: 'var(--bg-card)', 
                 padding: '16px', 
                 borderRadius: '12px', 
-                fontSize: '0.8rem',
+                fontSize: '0.75rem',
                 border: '1px solid var(--border)',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '12px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                gap: '10px'
             }}>
-                <h4 style={{ margin: 0, color: 'var(--accent)', fontSize: '0.9rem' }}>Technical Health Check</h4>
+                <h4 style={{ margin: 0, color: 'var(--accent)', fontSize: '0.8rem' }}>Health Check</h4>
                 {Object.entries(complexityData.details).map(([key, value]: [string, any]) => {
                     const normalizedValue = value || 0;
                     return (
@@ -145,7 +192,7 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl, complexityData }) => {
                                 <span style={{ color: 'var(--text-secondary)' }}>{key}</span>
                                 <span style={{ color: getScoreColor(100 - normalizedValue), fontWeight: '600' }}>{normalizedValue}/100</span>
                             </div>
-                            <div style={{ height: '4px', background: 'var(--border)', borderRadius: '2px', overflow: 'hidden' }}>
+                            <div style={{ height: '3px', background: 'var(--border)', borderRadius: '2px', overflow: 'hidden' }}>
                                 <div style={{ width: `${normalizedValue}%`, height: '100%', background: getScoreColor(100 - normalizedValue) }} />
                             </div>
                         </div>
@@ -154,27 +201,27 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl, complexityData }) => {
             </div>
         )}
 
-        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', wordBreak: 'break-all', padding: '12px', background: 'var(--bg-card)', borderRadius: '8px' }}>
+        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', wordBreak: 'break-all', padding: '10px', background: 'var(--bg-card)', borderRadius: '8px' }}>
           {repoUrl}
         </div>
         
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <button onClick={() => handleAction('tech', 'Technical Summary')} className="glass-morphism" style={{ padding: '12px', borderRadius: '8px', color: 'white', textAlign: 'left' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <button onClick={() => { handleAction('tech', 'Technical Summary'); if(isMobile) setIsSidebarOpen(false); }} className="glass-morphism" style={{ padding: '10px', borderRadius: '8px', color: 'white', textAlign: 'left' }}>
             {activeAnalysis === 'Technical Summary' ? 'Generating...' : '🛠️ Tech Summary'}
           </button>
-          <button onClick={() => handleAction('business', 'Business Summary')} className="glass-morphism" style={{ padding: '12px', borderRadius: '8px', color: 'white', textAlign: 'left' }}>
+          <button onClick={() => { handleAction('business', 'Business Summary'); if(isMobile) setIsSidebarOpen(false); }} className="glass-morphism" style={{ padding: '10px', borderRadius: '8px', color: 'white', textAlign: 'left' }}>
             {activeAnalysis === 'Business Summary' ? 'Generating...' : '💼 Business Summary'}
           </button>
-          <button onClick={() => handleAction('arch', 'Architecture')} className="glass-morphism" style={{ padding: '12px', borderRadius: '8px', color: 'white', textAlign: 'left' }}>
+          <button onClick={() => { handleAction('arch', 'Architecture'); if(isMobile) setIsSidebarOpen(false); }} className="glass-morphism" style={{ padding: '10px', borderRadius: '8px', color: 'white', textAlign: 'left' }}>
             {activeAnalysis === 'Architecture' ? 'Generating...' : '🏗️ Architecture'}
           </button>
-          <button onClick={() => handleAction('design', 'System Design')} className="glass-morphism" style={{ padding: '12px', borderRadius: '8px', color: 'white', textAlign: 'left' }}>
+          <button onClick={() => { handleAction('design', 'System Design'); if(isMobile) setIsSidebarOpen(false); }} className="glass-morphism" style={{ padding: '10px', borderRadius: '8px', color: 'white', textAlign: 'left' }}>
             {activeAnalysis === 'System Design' ? 'Generating...' : '📐 System Design'}
           </button>
-          <button onClick={() => handleAction('security', 'Security Scan')} className="glass-morphism" style={{ padding: '12px', borderRadius: '8px', color: 'white', textAlign: 'left' }}>
+          <button onClick={() => { handleAction('security', 'Security Scan'); if(isMobile) setIsSidebarOpen(false); }} className="glass-morphism" style={{ padding: '10px', borderRadius: '8px', color: 'white', textAlign: 'left' }}>
             {activeAnalysis === 'Security Scan' ? 'Scanning...' : '🛡️ Security Scan'}
           </button>
-          <button onClick={() => handleAction('code', 'Code Quality')} className="glass-morphism" style={{ padding: '12px', borderRadius: '8px', color: 'white', textAlign: 'left' }}>
+          <button onClick={() => { handleAction('code', 'Code Quality'); if(isMobile) setIsSidebarOpen(false); }} className="glass-morphism" style={{ padding: '10px', borderRadius: '8px', color: 'white', textAlign: 'left' }}>
             {activeAnalysis === 'Code Quality' ? 'Analyzing...' : '💎 Code Quality'}
           </button>
         </div>
@@ -182,7 +229,7 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl, complexityData }) => {
         <div style={{ marginTop: 'auto', textAlign: 'center' }}>
             <button 
                 onClick={() => window.location.reload()} 
-                style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-secondary)', padding: '8px 16px', borderRadius: '8px', width: '100%' }}
+                style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-secondary)', padding: '8px 16px', borderRadius: '8px', width: '100%', fontSize: '0.85rem' }}
             >
                 Change Repository
             </button>
@@ -190,8 +237,21 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl, complexityData }) => {
       </div>
 
       {/* Main Chat Area */}
-      <div style={{ background: 'var(--bg-dark)', display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
-        <div style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
+      <div style={{ background: 'var(--bg-dark)', display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', flex: 1 }}>
+        {/* Mobile Header */}
+        {isMobile && (
+            <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <button 
+                    onClick={() => setIsSidebarOpen(true)}
+                    style={{ background: 'transparent', border: 'none', color: 'white', fontSize: '1.5rem', display: 'flex', alignItems: 'center' }}
+                >
+                    ☰
+                </button>
+                <h3 className="gradient-text" style={{ fontSize: '1.1rem' }}>RepoMind</h3>
+            </div>
+        )}
+
+        <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '16px' : '32px' }}>
           {messages.length === 0 ? (
             <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
               Start a chat or select an analysis tool on the left.
@@ -220,22 +280,23 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl, complexityData }) => {
         </div>
 
         {/* Input area */}
-        <div style={{ padding: '24px', borderTop: '1px solid var(--border)' }}>
-          <form onSubmit={handleSend} style={{ display: 'flex', gap: '12px' }}>
+        <div style={{ padding: isMobile ? '16px' : '24px', borderTop: '1px solid var(--border)' }}>
+          <form onSubmit={handleSend} style={{ display: 'flex', gap: isMobile ? '8px' : '12px' }}>
             <input
               type="text"
-              placeholder="Ask anything about the codebase..."
+              placeholder="Ask about the codebase..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               disabled={isChatting}
               style={{
                 flex: 1,
-                padding: '16px',
+                padding: isMobile ? '12px 14px' : '16px',
                 borderRadius: '12px',
                 background: 'var(--bg-card)',
                 border: '1px solid var(--border)',
                 color: 'white',
-                outline: 'none'
+                outline: 'none',
+                fontSize: isMobile ? '0.9rem' : '1rem'
               }}
             />
             <button
@@ -245,12 +306,13 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl, complexityData }) => {
                 background: 'var(--primary)',
                 color: 'white',
                 border: 'none',
-                padding: '0 24px',
+                padding: isMobile ? '0 16px' : '0 24px',
                 borderRadius: '12px',
-                fontWeight: '600'
+                fontWeight: '600',
+                fontSize: isMobile ? '0.9rem' : '1rem'
               }}
             >
-              {isChatting ? '...' : 'Send'}
+              {isChatting ? '...' : (isMobile ? '→' : 'Send')}
             </button>
           </form>
         </div>
