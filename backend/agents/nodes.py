@@ -127,12 +127,13 @@ async def system_design_node(state):
 async def security_scan_node(state):
     import os
     from backend.tools.security_scanner import run_security_scan
+    from backend.app.config import settings
     
     repo_id = state["repo_id"]
-    repo_path = os.path.join("repos", repo_id)
+    repo_path = os.path.join(settings.REPO_STORAGE_DIR, repo_id)
     
     if not os.path.exists(repo_path):
-        return {"response": "Error: Repository path not found for scanning."}
+        return {"response": f"Error: Repository path not found at {repo_path}."}
         
     scan_results = run_security_scan(repo_path)
     
@@ -151,12 +152,13 @@ async def security_scan_node(state):
 async def code_analysis_node(state):
     import os
     from backend.tools.code_analyzer import run_code_analysis
+    from backend.app.config import settings
     
     repo_id = state["repo_id"]
-    repo_path = os.path.join("repos", repo_id)
+    repo_path = os.path.join(settings.REPO_STORAGE_DIR, repo_id)
     
     if not os.path.exists(repo_path):
-        return {"response": "Error: Repository path not found for analysis."}
+        return {"response": f"Error: Repository path not found at {repo_path}."}
         
     analysis_results = run_code_analysis(repo_path)
     
@@ -183,12 +185,13 @@ async def code_analysis_node(state):
 async def complexity_analysis_node(state):
     import os
     from backend.tools.complexity_analyzer import run_complexity_analysis
+    from backend.app.config import settings
     
     repo_id = state["repo_id"]
-    repo_path = os.path.join("repos", repo_id)
+    repo_path = os.path.join(settings.REPO_STORAGE_DIR, repo_id)
     
     if not os.path.exists(repo_path):
-        return {"response": "Error: Repository path not found for analysis."}
+        return {"response": f"Error: Repository path not found at {repo_path}."}
         
     analysis_results = run_complexity_analysis(repo_path)
     

@@ -22,7 +22,7 @@ class CodeAnalyzer:
         }
         
         for root, dirs, files in os.walk(self.repo_path):
-            if any(p in root for p in [".git", "node_modules", "vendor", "__pycache__"]):
+            if any(p in root for p in [".git", "node_modules", "vendor", "__pycache__", "static", "assets", "plugins", "tinymce"]):
                 continue
                 
             for file in files:
@@ -61,7 +61,8 @@ class CodeAnalyzer:
                 end_idx = func_starts[i+1] if i+1 < len(func_starts) else len(lines)
                 length = end_idx - start_idx
                 if length > 50:
-                    func_name = re.search(r'def\s+(\w+)', lines[start_idx]).group(1)
+                    func_match = re.search(r'def\s+(\w+)', lines[start_idx])
+                    func_name = func_match.group(1) if func_match else "unknown"
                     results["code_smells"].append({
                         "type": "Long Function",
                         "file": rel_path,
@@ -76,7 +77,8 @@ class CodeAnalyzer:
                     if arg_match:
                         args = [a.strip() for a in arg_match.group(1).split(",") if a.strip()]
                         if len(args) > 5:
-                            func_name = re.search(r'def\s+(\w+)', line).group(1)
+                            func_match = re.search(r'def\s+(\w+)', line)
+                            func_name = func_match.group(1) if func_match else "unknown"
                             results["code_smells"].append({
                                 "type": "Excessive Arguments",
                                 "file": rel_path,
@@ -92,7 +94,7 @@ class CodeAnalyzer:
                         "type": name,
                         "file": rel_path,
                         "line": content.count('\n', 0, match.start()) + 1,
-                        "snippet": match.group(0).strip()
+                        "snippet": match.group(0).strip() if match.group(0) else ""
                     })
 
             # 4. Duplicate Code (Basic line duplication within file)
