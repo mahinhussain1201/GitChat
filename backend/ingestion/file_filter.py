@@ -2,7 +2,8 @@ import os
 
 IGNORE_DIRS = {
     '.git', 'node_modules', 'dist', 'build', 'venv', '.venv', 
-    '__pycache__', '.next', '.pytest_cache', '.vscode', '.idea'
+    '__pycache__', '.next', '.pytest_cache', '.vscode', '.idea',
+    'static', 'assets', 'vendor', 'plugins', 'tinymce'
 }
 
 ALLOWED_EXTENSIONS = {
@@ -19,6 +20,8 @@ def should_ignore(path: str) -> bool:
 def is_allowed_file(filename: str) -> bool:
     if filename.startswith('.'):
         return filename == 'Dockerfile' or filename.endswith(('.yml', '.yaml', '.json'))
+    if filename.endswith(('.min.js', '.min.css')):
+        return False
     ext = os.path.splitext(filename)[1].lower()
     return ext in ALLOWED_EXTENSIONS
 

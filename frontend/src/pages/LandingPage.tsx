@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface LandingPageProps {
   onAnalyze: (url: string) => void;
@@ -87,30 +87,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onAnalyze, isLoading }) => {
           </form>
         </>
       ) : (
-        <div className="glass-morphism" style={{ 
-          width: '100%', 
-          maxWidth: '500px', 
-          padding: isMobile ? '24px' : '40px', 
-          borderRadius: '24px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '24px',
-          alignItems: 'center'
-        }}>
-          <div className="animate-spin-slow" style={{ 
-            fontSize: '3rem', 
-            width: '60px', 
-            height: '60px', 
-            border: '4px solid var(--border)', 
-            borderTopColor: 'var(--primary)', 
-            borderRadius: '50%' 
-          }} />
-          <div>
-            <h2 style={{ fontSize: isMobile ? '1.25rem' : '1.5rem', marginBottom: '8px' }}>Analyzing Repository</h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Cloning, Filtering, and Indexing code chunks...</p>
-          </div>
-          <div className="loading-bar" style={{ width: '100%' }} />
-        </div>
+        <LoadingState isMobile={isMobile} />
       )}
       
       <div style={{ 
@@ -133,6 +110,132 @@ const LandingPage: React.FC<LandingPageProps> = ({ onAnalyze, isLoading }) => {
           <h3 style={{ fontSize: '1.25rem', color: 'var(--accent)' }}>ChromaDB</h3>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Vector Engine</p>
         </div>
+      </div>
+    </div>
+  );
+};
+
+const LoadingState: React.FC<{ isMobile: boolean }> = ({ isMobile }) => {
+  const [messageIndex, setMessageIndex] = useState(0);
+  const [tipIndex, setTipIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+
+  const messages = [
+    "Cloning the repository...",
+    "Scanning code structure...",
+    "Filtering source files...",
+    "Generating token chunks...",
+    "Building vector embeddings...",
+    "Calculating complexity metrics...",
+    "Preparing your dashboard..."
+  ];
+
+  const tips = [
+    "Tip: RepoMind works with public GitHub repositories.",
+    "Tip: You can ask for architectural summaries later.",
+    "Tip: Large repositories might take a few extra seconds.",
+    "Tip: We use Llama 3 for deep code reasoning.",
+    "Tip: Check out the Security Scan for vulnerability audits."
+  ];
+
+  useEffect(() => {
+    const messageInterval = setInterval(() => {
+      setMessageIndex((prev) => (prev + 1) % messages.length);
+    }, 3000);
+
+    const tipInterval = setInterval(() => {
+      setTipIndex((prev) => (prev + 1) % tips.length);
+    }, 5000);
+
+    const progressInterval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 95) return prev;
+        return prev + Math.random() * 2;
+      });
+    }, 400);
+
+    return () => {
+      clearInterval(messageInterval);
+      clearInterval(tipInterval);
+      clearInterval(progressInterval);
+    };
+  }, []);
+
+  return (
+    <div className="glass-morphism" style={{ 
+      width: '100%', 
+      maxWidth: '500px', 
+      padding: isMobile ? '32px 24px' : '48px', 
+      borderRadius: '24px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '32px',
+      alignItems: 'center',
+      boxShadow: '0 20px 50px rgba(0,0,0,0.3)'
+    }}>
+      <div className="pulse-loader" style={{ 
+        position: 'relative',
+        width: '100px',
+        height: '100px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+          <div className="loader-inner" style={{
+            width: '60px',
+            height: '60px',
+            border: '4px solid var(--border)',
+            borderTopColor: 'var(--primary)',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }} />
+          <div className="pulse-brain" style={{
+            position: 'absolute',
+            fontSize: '2rem'
+          }}>
+            🧠
+          </div>
+      </div>
+
+      <div style={{ textAlign: 'center', width: '100%' }}>
+        <h2 style={{ fontSize: isMobile ? '1.25rem' : '1.5rem', marginBottom: '16px', height: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {messages[messageIndex]}
+        </h2>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+            <div style={{ 
+            flex: 1, 
+            height: '8px', 
+            background: 'var(--border)', 
+            borderRadius: '4px', 
+            overflow: 'hidden'
+            }}>
+            <div style={{ 
+                width: `${progress}%`, 
+                height: '100%', 
+                background: 'linear-gradient(90deg, var(--primary), var(--accent))',
+                transition: 'width 0.4s ease',
+                boxShadow: '0 0 10px var(--primary)'
+            }} />
+            </div>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', minWidth: '35px' }}>{Math.round(progress)}%</span>
+        </div>
+        
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontStyle: 'italic', height: '1.2rem' }}>
+          {tips[tipIndex]}
+        </p>
+      </div>
+
+      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+        {messages.map((_, i) => (
+          <div key={i} style={{ 
+            width: '8px', 
+            height: '8px', 
+            borderRadius: '50%', 
+            background: i <= messageIndex ? 'var(--primary)' : 'var(--border)',
+            transition: 'background 0.3s ease'
+          }} />
+        ))}
       </div>
     </div>
   );

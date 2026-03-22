@@ -31,21 +31,32 @@ class ComplexityAnalyzer:
                 
                 if file.endswith((".py", ".js", ".ts", ".tsx")):
                     metrics, functions = self._analyze_file(file_path, rel_path)
-                    file_metrics.append(metrics)
-                    all_functions.extend(functions)
+                    if metrics:
+                        file_metrics.append(metrics)
+                        all_functions.extend(functions)
 
         if not file_metrics:
-            return {"error": "No source files found for analysis."}
+            return {
+                "final_score": 0,
+                "heatmap": [],
+                "top_functions": [],
+                "details": {
+                    "Logic Flow Complexity": 0,
+                    "Structural Health": 0,
+                    "Code Logic Density": 0
+                }
+            }
 
         # Calculate Repository Complexity Score
-        avg_cyclomatic = sum(m["cyclomatic"] for m in file_metrics) / len(file_metrics)
-        avg_cognitive = sum(m["cognitive"] for m in file_metrics) / len(file_metrics)
-        avg_loc = sum(m["loc"] for m in file_metrics) / len(file_metrics)
-        avg_nesting = sum(m["nesting"] for m in file_metrics) / len(file_metrics)
-        avg_dep = sum(m["dependency"] for m in file_metrics) / len(file_metrics)
-        avg_mod = sum(m["modularity"] for m in file_metrics) / len(file_metrics)
-        avg_dup = sum(m["duplication"] for m in file_metrics) / len(file_metrics)
-        avg_maint = sum(m["maintainability"] for m in file_metrics) / len(file_metrics)
+        count = len(file_metrics)
+        avg_cyclomatic = sum(m.get("cyclomatic", 0) for m in file_metrics) / count
+        avg_cognitive = sum(m.get("cognitive", 0) for m in file_metrics) / count
+        avg_loc = sum(m.get("loc", 0) for m in file_metrics) / count
+        avg_nesting = sum(m.get("nesting", 0) for m in file_metrics) / count
+        avg_dep = sum(m.get("dependency", 0) for m in file_metrics) / count
+        avg_mod = sum(m.get("modularity", 5) for m in file_metrics) / count
+        avg_dup = sum(m.get("duplication", 2) for m in file_metrics) / count
+        avg_maint = sum(m.get("maintainability", 100) for m in file_metrics) / count
 
         repo_score = (
             self._normalize(avg_cyclomatic, 20) * self.weights["cyclomatic"] +

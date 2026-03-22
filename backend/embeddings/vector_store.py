@@ -12,6 +12,9 @@ class VectorStore:
         return self.client.get_or_create_collection(name=f"repo_{repo_id}")
     
     def add_chunks(self, repo_id: str, chunks: List[Dict]):
+        if not chunks:
+            return
+            
         collection = self.get_or_create_collection(repo_id)
         
         documents = [c["content"] for c in chunks]

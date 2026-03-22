@@ -43,6 +43,8 @@ async def analyze_repo(request: RepoRequest, background_tasks: BackgroundTasks):
         result = await repo_service.process_repository(request.repo_url)
         return {"status": "success", "data": result}
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/chat")

@@ -11,7 +11,8 @@ class RepoService:
         # Check if already processed and populated in VectorStore
         if vector_store.collection_exists(repo_id):
             print(f"Repository {repo_url} already indexed. Skipping ingestion.")
-            repo_path = os.path.join("repos", repo_id)
+            from backend.app.config import settings
+            repo_path = os.path.join(settings.REPO_STORAGE_DIR, repo_id)
             from backend.tools.complexity_analyzer import run_complexity_analysis
             complexity_results = run_complexity_analysis(repo_path)
             
@@ -27,9 +28,13 @@ class RepoService:
         
         # 2. Filter
         files = filter_files(repo_path)
+        if not files:
+            raise Exception("No relevant source files found in the repository.")
         
         # 3. Chunk
         chunks = chunk_code(files)
+        if not chunks:
+            raise Exception("No code chunks generated from the repository.")
         
         # 4. Store
         vector_store.add_chunks(repo_id, chunks)
