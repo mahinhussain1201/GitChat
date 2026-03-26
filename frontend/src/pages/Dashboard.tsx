@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { repoService } from '../services/api';
 
 interface DashboardProps {
@@ -463,6 +464,7 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl, complexityData }) => {
                           </div>
                         ) : (
                           <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
                             components={{
                               code({ node, className, children, ...props }: any) {
                                 const match = /language-(\w+)/.exec(className || '');

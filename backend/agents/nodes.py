@@ -156,13 +156,18 @@ async def security_scan_node(state):
     scan_results = run_security_scan(repo_path)
     
     prompt = f"""
-    You are a security expert. Analyze the following security scan results and provide a concise, actionable summary.
-    Highlight the most critical findings and suggest fixes.
+    You are a security expert. Analyze the following security scan results and provide a professional, actionable summary.
+    
+    STRICT FORMATTING RULES:
+    1. Use a Markdown Table for "Vulnerabilities Identified" with columns: | File | Line | Type | Severity | Description | Recommendation |.
+    2. Use fenced code blocks (```language) for any specific code snippets or secrets found.
+    3. Ensure no unnecessary escaping (like \") appears in the output.
+    4. Highlight the most critical (High/Critical) findings first.
     
     Scan Results:
     {json.dumps(scan_results, indent=2)}
     
-    Format the response in a professional security report style using markdown.
+    Format the response in a professional security report style.
     """
     response = await llm.ainvoke(prompt)
     return {"response": response.content}
@@ -181,21 +186,25 @@ async def code_analysis_node(state):
     analysis_results = run_code_analysis(repo_path)
     
     prompt = f"""
-    You are a code quality expert. Analyze the following code quality scan results and provide a professional, constructive report.
-    Identify the most critical code smells, bad practices, and duplicate code blocks.
-    Suggest improvements and refactoring strategies.
+    You are a code quality expert. Analyze the following results and provide a professional, constructive report.
+    
+    STRICT FORMATTING RULES:
+    1. Use Markdown Tables for identifying specific issues:
+       - | File | Line | Type | Description | for "Code Smells" and "Bad Practices".
+       - | File A | Line | File B | Line | Content Snippet | for "Duplicate Code".
+    2. Use fenced code blocks (```language) for any code snippets or refactoring examples.
+    3. Ensure no unnecessary escaping (like \") appears in the output.
     
     Scan Results:
     {json.dumps(analysis_results, indent=2)}
     
-    Format the response in a professional code quality report style using markdown.
     Include sections for:
     - Summary of Findings
     - Unused Imports
-    - Code Smells (Long Functions, Excessive Arguments)
-    - Duplicate Code
-    - Bad Practices
-    - Recommendations
+    - Code Smells (Long Functions, Excessive Arguments) - USE TABLES
+    - Duplicate Code - USE TABLES
+    - Bad Practices - USE TABLES
+    - Recommendations (with code examples)
     """
     response = await llm.ainvoke(prompt)
     return {"response": response.content}
@@ -217,24 +226,20 @@ async def complexity_analysis_node(state):
     You are a senior software architect and complexity expert.
     Analyze the following complexity scan results and provide a comprehensive report.
     
-    CRITICAL REQUIREMENTS:
-    1. Show the "Complexity Score: {analysis_results['final_score']} / 100" and "Grade: {analysis_results['grade']}" at the very top.
-    2. Generate a visual-style File Heatmap summary (File Path -> Risk Level -> Score).
-    3. List the top 10 most complex functions with their specific complexity drivers.
-    4. Interpret the Metrics as Health Percentages (0-100 where 100 is best):
-       - Structural Health (Maintainability Index): {analysis_results['metrics']['maintainability']}%
-       - Logic Flow Health (derived from Cyclomatic {analysis_results['metrics']['avg_cyclomatic']}): {max(0, min(100, int(110 - (analysis_results['metrics']['avg_cyclomatic'] * 10))))}%
-       - Density Health (derived from {analysis_results['metrics']['avg_loc']} LOC avg): {max(0, min(100, int(110 - (analysis_results['metrics']['avg_loc'] / 5))))}%
-    5. Discuss the identified Code Smells: {', '.join(analysis_results['code_smells'])}
+    STRICT FORMATTING RULES:
+    1. Show "Technical Health: {analysis_results['final_score']}/100 ({analysis_results['grade']})" as a large heading.
+    2. Use a Markdown Table for the "File Heatmap Summary" using: | File | Risk | Score | Reason |.
+    3. Use a Markdown Table for "Top 10 Complex Functions" using: | Function | File | Complexity | Drivers |.
+    4. Ensure no unnecessary escaping (like \") appears in the output.
     
     Analysis Results:
     {json.dumps(analysis_results, indent=2)}
     
     Format the response:
-    1. Start with "Technical Health: {analysis_results['final_score']}/100 ({analysis_results['grade']})" (Large heading).
-    2. Provide a "Core Metrics (Health %)" section explaining the Maintainability, Logic Flow, and Density scores.
-    3. Include the "Risk Heatmap" and "Complex Functions" sections.
-    4. Conclude with "Anti-patterns & Recommendations" based on {len(analysis_results['code_smells'])} detected smells.
+    1. Start with the Health Score and Grade.
+    2. Provide a "Core Metrics (Health %)" section.
+    3. Include the "Risk Heatmap" and "Complex Functions" tables.
+    4. Conclude with "Anti-patterns & Recommendations" based on detected smells.
     """
     response = await llm.ainvoke(prompt)
     return {"response": response.content}
