@@ -247,6 +247,7 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl, complexityData }) => {
             <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase', marginBottom: '8px', paddingLeft: '12px' }}>Analysis Tools</p>
             {[
               { id: 'tech', label: 'Technical Summary', icon: '📝' },
+              { id: 'business', label: 'Executive Summary', icon: '💼' },
               { id: 'arch', label: 'Architecture Review', icon: '🏢' },
               { id: 'security', label: 'Security Scan', icon: '🛡️' },
               { id: 'code', label: 'Code Analysis', icon: '🔍' },

@@ -103,7 +103,25 @@ async def non_tech_summary_node(state):
     results = vector_store.query(repo_id, "business logic and product features", n_results=10)
     context = "\n---\n".join(results['documents'][0])
     
-    prompt = f"Provide a non-technical, business-level summary of what this project does:\n\n{context}"
+    prompt = f"""
+    You are a high-level business consultant and technical strategist. 
+    Your goal is to "sell" this project to a non-technical audience (executives, stakeholders, or potential investors).
+    
+    Based on the following code context, provide an Executive Summary that:
+    1. Explains the "Value Proposition": What problem does this solve and why is it valuable?
+    2. High-level Features: What are the key business-facing capabilities?
+    3. Market Suitability: Who is the target user for this software?
+    4. Future Potential: What could this grow into?
+    
+    STRICT RULES:
+    - NO technical jargon (e.g., "REST API", "React Hook", "Async/Await").
+    - Focus on outcomes and impact, not implementation.
+    - Use a professional, persuasive, and visionary tone.
+    - Format with clear, high-level sections.
+    
+    Context Extracts:
+    {context}
+    """
     response = await llm.ainvoke(prompt)
     return {"response": response.content}
 
