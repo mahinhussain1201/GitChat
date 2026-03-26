@@ -59,7 +59,7 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl, complexityData }) => {
       else if (action === 'code') response = await repoService.getCodeAnalysis(repoUrl);
       else if (action === 'complexity-analysis') response = await repoService.getComplexityAnalysis(repoUrl);
       
-      const content = response?.data.summary || response?.data.architecture || response?.data.system_design || response?.data.security_scan || response?.data.code_analysis || response?.data.response;
+      const content = response?.data.summary || response?.data.architecture || response?.data.system_design || response?.data.security_scan || response?.data.code_analysis || response?.data.complexity_analysis || response?.data.response;
       
       setMessages(prev => {
         const newMessages = [...prev];
