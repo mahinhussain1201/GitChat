@@ -23,94 +23,170 @@ const LandingPage: React.FC<LandingPageProps> = ({ onAnalyze, isLoading }) => {
   };
 
   return (
-    <div className="landing-container animate-fade-in" style={{
+    <div className="landing-container" style={{
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      minHeight: '80vh',
+      minHeight: '100vh',
       textAlign: 'center',
-      padding: isMobile ? '40px 20px' : '0 20px'
+      padding: '20px',
+      position: 'relative'
     }}>
-      <div className={isLoading ? "animate-pulse" : ""} style={{ marginBottom: '1rem' }}>
-        <h1 style={{ fontSize: isMobile ? '3rem' : '4.5rem', margin: 0 }} className="gradient-text">
-          RepoMind
-        </h1>
-      </div>
+      <div className="bg-mesh" />
       
-      {!isLoading ? (
-        <>
-          <p style={{ color: 'var(--text-secondary)', fontSize: isMobile ? '1rem' : '1.25rem', marginBottom: '2rem', maxWidth: '600px' }}>
-            Unlock AI-powered insights from any GitHub repository. 
-            Analyze codebases, chat with files, and understand complex architectures instantly.
-          </p>
-          
-          <form onSubmit={handleSubmit} className="glass-morphism" style={{
-            width: '100%',
-            maxWidth: '600px',
-            padding: '8px',
-            borderRadius: '16px',
-            display: 'flex',
-            flexDirection: isMobile ? 'column' : 'row',
-            gap: '8px'
+      <div className="animate-fade-in" style={{ maxWidth: '800px', width: '100%' }}>
+        <div style={{ marginBottom: '2.5rem' }}>
+          <span style={{ 
+            background: 'var(--primary-glow)', 
+            color: 'var(--primary)', 
+            padding: '6px 16px', 
+            borderRadius: '20px', 
+            fontSize: '0.85rem', 
+            fontWeight: 600,
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase',
+            marginBottom: '1rem',
+            display: 'inline-block'
           }}>
-            <input
-              type="text"
-              placeholder="Paste GitHub Repository URL"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              style={{
-                flex: 1,
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--text-primary)',
-                padding: '12px 16px',
-                fontSize: '1rem',
-                outline: 'none'
-              }}
-            />
-            <button
-              type="submit"
-              disabled={!url.trim()}
-              style={{
-                background: 'var(--primary)',
-                color: 'white',
-                border: 'none',
-                padding: '12px 24px',
-                borderRadius: '12px',
-                fontWeight: '600',
-                opacity: !url.trim() ? 0.5 : 1
-              }}
-            >
-              Analyze Repo
-            </button>
-          </form>
-        </>
-      ) : (
-        <LoadingState isMobile={isMobile} />
-      )}
-      
-      <div style={{ 
-        marginTop: '4rem', 
-        display: 'flex', 
-        flexDirection: isMobile ? 'column' : 'row',
-        gap: isMobile ? '24px' : '40px', 
-        opacity: isLoading ? 0.3 : 1, 
-        transition: 'opacity 0.5s' 
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <h3 style={{ fontSize: '1.25rem', color: 'var(--accent)' }}>800</h3>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Token Chunks</p>
+            AI-Powered Code Intelligence
+          </span>
+          <h1 style={{ 
+            fontSize: isMobile ? '3.5rem' : '5.5rem', 
+            margin: '0.5rem 0 1rem 0', 
+            fontWeight: 800,
+            letterSpacing: '-0.03em',
+            lineHeight: 1
+          }} className="gradient-text">
+            RepoMind
+          </h1>
+          <p style={{ 
+            color: 'var(--text-secondary)', 
+            fontSize: isMobile ? '1.1rem' : '1.5rem', 
+            marginBottom: '3rem', 
+            fontWeight: 400,
+            lineHeight: 1.5
+          }}>
+            The intelligence layer for your repository.<br/>
+            Decode architecture, audit security, and chat with code instantly.
+          </p>
         </div>
-        <div style={{ textAlign: 'center' }}>
-          <h3 style={{ fontSize: '1.25rem', color: 'var(--accent)' }}>Llama 3.1</h3>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Reasoning Engine</p>
-        </div>
-        <div style={{ textAlign: 'center' }}>
-          <h3 style={{ fontSize: '1.25rem', color: 'var(--accent)' }}>ChromaDB</h3>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Vector Engine</p>
-        </div>
+        
+        {!isLoading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
+            <form onSubmit={handleSubmit} className="glass-morphism" style={{
+              width: '100%',
+              maxWidth: '650px',
+              padding: '10px',
+              borderRadius: '24px',
+              display: 'flex',
+              flexDirection: isMobile ? 'column' : 'row',
+              gap: '10px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+            }}>
+              <input
+                type="text"
+                placeholder="Paste a GitHub repository URL..."
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                style={{
+                  flex: 1,
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--text-primary)',
+                  padding: '16px 20px',
+                  fontSize: '1.1rem',
+                  outline: 'none'
+                }}
+              />
+              <button
+                type="submit"
+                disabled={!url.trim()}
+                style={{
+                  background: 'var(--primary)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '16px 32px',
+                  borderRadius: '16px',
+                  fontWeight: '600',
+                  fontSize: '1rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  opacity: !url.trim() ? 0.5 : 1
+                }}
+              >
+                Analyze Repo
+              </button>
+            </form>
+
+            <div style={{ 
+              display: 'flex', 
+              flexWrap: 'wrap', 
+              justifyContent: 'center', 
+              gap: '12px',
+              opacity: 0.8 
+            }}>
+              {['Analyze clerk-js', 'Scan irc_mailer for flaws', 'Explain langgraph structure'].map((tip) => (
+                <button 
+                  key={tip}
+                  onClick={() => setUrl(`https://github.com/${tip === 'Analyze clerk-js' ? 'clerkinc/clerk-js' : tip.includes('irc') ? 'mahinhussain1201/irc_mailer' : 'langchain-ai/langgraph'}`)}
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid var(--border)',
+                    color: 'var(--text-secondary)',
+                    padding: '8px 16px',
+                    borderRadius: '12px',
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  {tip}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <LoadingState isMobile={isMobile} />
+        )}
       </div>
+
+      {!isLoading && (
+        <div style={{ 
+          marginTop: '6rem', 
+          display: 'grid',
+          gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
+          gap: '24px',
+          width: '100%',
+          maxWidth: '900px',
+          padding: '0 20px'
+        }}>
+          {[
+            { label: 'Token Chunks', value: '800+', desc: 'Context-aware indexing' },
+            { label: 'Reasoning Engine', value: 'Llama 3.1', desc: 'Deep logic analysis' },
+            { label: 'Vector Engine', value: 'ChromaDB', desc: 'Fast semantic retrieval' }
+          ].map((stat) => (
+            <div key={stat.label} className="glass-morphism stat-card" style={{ 
+              padding: '32px 24px',
+              borderRadius: '24px',
+              textAlign: 'center',
+              transition: 'transform 0.3s ease, background 0.3s ease',
+              cursor: 'default'
+            }}>
+              <h3 style={{ fontSize: '2rem', color: 'white', fontWeight: 800, marginBottom: '4px' }}>{stat.value}</h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--primary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>{stat.label}</p>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{stat.desc}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <style>{`
+        .stat-card:hover {
+          transform: translateY(-8px);
+          background: rgba(255, 255, 255, 0.05) !important;
+        }
+      `}</style>
     </div>
   );
 };
