@@ -213,14 +213,26 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl, complexityData }) => {
             {showHealthBreakup && (
                <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                  {[
-                   { label: 'Logic Flow', value: complexityData?.details?.['Logic Flow Complexity'] },
-                   { label: 'Structural', value: complexityData?.details?.['Structural Health'] },
-                   { label: 'Density', value: complexityData?.details?.['Code Logic Density'] }
+                   { 
+                     label: 'Logic Flow', 
+                     value: complexityData?.metrics?.avg_cyclomatic ? Math.max(0, Math.min(100, 110 - (complexityData.metrics.avg_cyclomatic * 10))) : 0,
+                     display: `${Math.round(Math.max(0, Math.min(100, 110 - (complexityData.metrics.avg_cyclomatic * 10))))}%`
+                   },
+                   { 
+                     label: 'Structural', 
+                     value: complexityData?.metrics?.maintainability || 0,
+                     display: `${complexityData?.metrics?.maintainability || 0}%`
+                   },
+                   { 
+                     label: 'Density', 
+                     value: complexityData?.metrics?.avg_loc ? Math.max(0, Math.min(100, 110 - (complexityData.metrics.avg_loc / 5))) : 0,
+                     display: `${Math.round(Math.max(0, Math.min(100, 110 - (complexityData.metrics.avg_loc / 5))))}%`
+                   }
                  ].map(item => (
                    <div key={item.label}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '4px' }}>
                         <span>{item.label}</span>
-                        <span>{item.value || 0}%</span>
+                        <span style={{ color: 'var(--text-secondary)' }}>{item.display}</span>
                       </div>
                       <div style={{ height: '4px', background: 'var(--border)', borderRadius: '2px' }}>
                         <div style={{ width: `${item.value || 0}%`, height: '100%', background: getScoreColor(item.value || 0), borderRadius: '2px' }} />
@@ -325,6 +337,51 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl, complexityData }) => {
                     Deep-dive into architecture, security, or data flow.
                  </p>
                  
+                 {/* Heatmap Visualization */}
+                 {complexityData?.heatmap && (
+                   <div className="glass-morphism" style={{ 
+                     marginBottom: '4rem', 
+                     padding: '32px', 
+                     borderRadius: '32px',
+                     textAlign: 'left',
+                     background: 'rgba(255,255,255,0.02)'
+                   }}>
+                     <h4 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                       <span>📊</span> Repository Heatmap
+                     </h4>
+                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                        {complexityData.heatmap.map((item: any, i: number) => (
+                           <div 
+                             key={i} 
+                             title={`${item.file}: Score ${item.score} (${item.risk})`}
+                             style={{ 
+                               width: '12px', 
+                               height: '12px', 
+                               borderRadius: '3px', 
+                               background: item.risk === 'High' ? 'var(--danger)' : item.risk === 'Moderate' ? '#fbbf24' : '#10b981',
+                               opacity: 0.5 + (item.score / 200),
+                               cursor: 'pointer',
+                               transition: 'all 0.2s ease'
+                             }}
+                             onMouseEnter={(e) => {
+                               e.currentTarget.style.transform = 'scale(1.5)';
+                               e.currentTarget.style.zIndex = '10';
+                               e.currentTarget.style.boxShadow = '0 0 10px rgba(255,255,255,0.3)';
+                             }}
+                             onMouseLeave={(e) => {
+                               e.currentTarget.style.transform = 'scale(1)';
+                               e.currentTarget.style.zIndex = '1';
+                               e.currentTarget.style.boxShadow = 'none';
+                             }}
+                            />
+                        ))}
+                     </div>
+                     <p style={{ marginTop: '16px', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                       Hover over blocks to see file risk levels. Red indicates high complexity / maintenance risk.
+                     </p>
+                   </div>
+                 )}
+
                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '20px', textAlign: 'left' }}>
                     {[
                       { icon: '🗺️', text: 'Explain the high-level architecture', action: 'arch' },

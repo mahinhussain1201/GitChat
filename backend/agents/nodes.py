@@ -200,21 +200,23 @@ async def complexity_analysis_node(state):
     Analyze the following complexity scan results and provide a comprehensive report.
     
     CRITICAL REQUIREMENTS:
-    1. Show the "Complexity Score: {analysis_results['final_score']} / 100" at the very top.
-    2. Generate the File Heatmap as requested (File Path -> Color Emoji -> Score).
-    3. List the top 10 most complex functions with details.
-    4. Provide architecture style identification, anti-patterns, and scalability concerns.
+    1. Show the "Complexity Score: {analysis_results['final_score']} / 100" and "Grade: {analysis_results['grade']}" at the very top.
+    2. Generate a visual-style File Heatmap summary (File Path -> Risk Level -> Score).
+    3. List the top 10 most complex functions with their specific complexity drivers.
+    4. Interpret the Metrics as Health Percentages (0-100 where 100 is best):
+       - Structural Health (Maintainability Index): {analysis_results['metrics']['maintainability']}%
+       - Logic Flow Health (derived from Cyclomatic {analysis_results['metrics']['avg_cyclomatic']}): {max(0, min(100, int(110 - (analysis_results['metrics']['avg_cyclomatic'] * 10))))}%
+       - Density Health (derived from {analysis_results['metrics']['avg_loc']} LOC avg): {max(0, min(100, int(110 - (analysis_results['metrics']['avg_loc'] / 5))))}%
+    5. Discuss the identified Code Smells: {', '.join(analysis_results['code_smells'])}
     
     Analysis Results:
     {json.dumps(analysis_results, indent=2)}
     
     Format the response:
-    1. Start with "Complexity Score: {analysis_results['final_score']} / 100" (Large heading).
-    2. Provide a "Technical Health Check" section with scores for Logic Flow, Structural Health, and Logic Density.
-    3. Include the File Heatmap and top 10 functions.
-    4. Conclude with Architecture and Anti-patterns.
-    
-    Ensure all metrics are interpreted as scores out of 100 where higher is better health.
+    1. Start with "Technical Health: {analysis_results['final_score']}/100 ({analysis_results['grade']})" (Large heading).
+    2. Provide a "Core Metrics (Health %)" section explaining the Maintainability, Logic Flow, and Density scores.
+    3. Include the "Risk Heatmap" and "Complex Functions" sections.
+    4. Conclude with "Anti-patterns & Recommendations" based on {len(analysis_results['code_smells'])} detected smells.
     """
     response = await llm.ainvoke(prompt)
     return {"response": response.content}
