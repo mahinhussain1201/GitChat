@@ -57,7 +57,12 @@ async def chat_stream(request: ChatRequest):
     try:
         return StreamingResponse(
             chat_service.stream_chat(request.repo_url, request.message),
-            media_type="text/event-stream"
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no"
+            }
         )
     except Exception as e:
         import traceback
