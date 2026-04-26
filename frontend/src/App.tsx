@@ -31,7 +31,7 @@ const App: React.FC = () => {
           position: 'fixed',
           top: '20px',
           right: '20px',
-          background: 'var(--danger)',
+          background: 'var(--color-danger)',
           color: 'white',
           padding: '12px 24px',
           borderRadius: '8px',
