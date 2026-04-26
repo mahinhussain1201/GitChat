@@ -1,5 +1,5 @@
-from backend.agents.langgraph_workflow import create_workflow
-from backend.ingestion.clone_repo import get_repo_id
+from agents.langgraph_workflow import create_workflow
+from ingestion.clone_repo import get_repo_id
 from langchain_core.messages import HumanMessage
 
 class ChatService:

@@ -1,5 +1,5 @@
 from sentence_transformers import SentenceTransformer
-from backend.app.config import settings
+from app.config import settings
 
 class Embedder:
     def __init__(self):

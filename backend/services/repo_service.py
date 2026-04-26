@@ -1,7 +1,7 @@
-from backend.ingestion.clone_repo import clone_repository, get_repo_id
-from backend.ingestion.file_filter import filter_files
-from backend.ingestion.chunker import chunk_code
-from backend.embeddings.vector_store import vector_store
+from ingestion.clone_repo import clone_repository, get_repo_id
+from ingestion.file_filter import filter_files
+from ingestion.chunker import chunk_code
+from embeddings.vector_store import vector_store
 import os
 
 class RepoService:
@@ -11,9 +11,9 @@ class RepoService:
         # Check if already processed and populated in VectorStore
         if vector_store.collection_exists(repo_id):
             print(f"Repository {repo_url} already indexed. Skipping ingestion.")
-            from backend.app.config import settings
+            from app.config import settings
             repo_path = os.path.join(settings.REPO_STORAGE_DIR, repo_id)
-            from backend.tools.complexity_analyzer import run_complexity_analysis
+            from tools.complexity_analyzer import run_complexity_analysis
             complexity_results = run_complexity_analysis(repo_path)
             
             return {
@@ -40,7 +40,7 @@ class RepoService:
         vector_store.add_chunks(repo_id, chunks)
         
         # 5. Complexity Analysis
-        from backend.tools.complexity_analyzer import run_complexity_analysis
+        from tools.complexity_analyzer import run_complexity_analysis
         complexity_results = run_complexity_analysis(repo_path)
         
         return {

@@ -1,6 +1,6 @@
 from langchain_groq import ChatGroq
-from backend.app.config import settings
-from backend.embeddings.vector_store import vector_store
+from app.config import settings
+from embeddings.vector_store import vector_store
 from langchain_core.messages import AIMessage
 import json
 
@@ -144,8 +144,8 @@ async def system_design_node(state):
     return {"response": response.content}
 async def security_scan_node(state):
     import os
-    from backend.tools.security_scanner import run_security_scan
-    from backend.app.config import settings
+    from tools.security_scanner import run_security_scan
+    from app.config import settings
     
     repo_id = state["repo_id"]
     repo_path = os.path.join(settings.REPO_STORAGE_DIR, repo_id)
@@ -174,8 +174,8 @@ async def security_scan_node(state):
 
 async def code_analysis_node(state):
     import os
-    from backend.tools.code_analyzer import run_code_analysis
-    from backend.app.config import settings
+    from tools.code_analyzer import run_code_analysis
+    from app.config import settings
     
     repo_id = state["repo_id"]
     repo_path = os.path.join(settings.REPO_STORAGE_DIR, repo_id)
@@ -211,8 +211,8 @@ async def code_analysis_node(state):
 
 async def complexity_analysis_node(state):
     import os
-    from backend.tools.complexity_analyzer import run_complexity_analysis
-    from backend.app.config import settings
+    from tools.complexity_analyzer import run_complexity_analysis
+    from app.config import settings
     
     repo_id = state["repo_id"]
     repo_path = os.path.join(settings.REPO_STORAGE_DIR, repo_id)

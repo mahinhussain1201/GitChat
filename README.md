@@ -129,10 +129,11 @@ python -m venv env
 source env/bin/activate        # Windows: env\Scripts\activate
 
 # Install dependencies
-pip install -r backend/requirements.txt
+cd backend
+pip install -r requirements.txt
 
 # Start the API server
-python -m uvicorn backend.app.main:app --reload --host 0.0.0.0 --port 8000
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 The API is now running at `http://localhost:8000`.

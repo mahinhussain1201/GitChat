@@ -2,7 +2,7 @@ import git
 import os
 import shutil
 import hashlib
-from backend.app.config import settings
+from app.config import settings
 
 def get_repo_id(repo_url: str) -> str:
     return hashlib.md5(repo_url.encode()).hexdigest()

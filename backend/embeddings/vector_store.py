@@ -1,6 +1,6 @@
 import chromadb
 from chromadb.config import Settings
-from backend.app.config import settings
+from app.config import settings
 from typing import List, Dict
 import uuid
 

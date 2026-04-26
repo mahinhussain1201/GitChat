@@ -3,19 +3,12 @@ from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
-from backend.services.repo_service import RepoService
-from backend.services.chat_service import ChatService
+from services.repo_service import RepoService
+from services.chat_service import ChatService
 
 app = FastAPI(title="RepoMind API")
 
-origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:5174",
-    "http://127.0.0.1:5174",
-    "http://localhost:5175",
-    "http://127.0.0.1:5175",
-]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,

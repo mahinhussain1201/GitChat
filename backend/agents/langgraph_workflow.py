@@ -2,7 +2,7 @@ from typing import List, TypedDict, Annotated, Sequence
 import operator
 from langchain_core.messages import BaseMessage
 from langgraph.graph import StateGraph, END
-from backend.app.config import settings
+from app.config import settings
 
 class AgentState(TypedDict):
     messages: Annotated[Sequence[BaseMessage], operator.add]
@@ -14,7 +14,7 @@ class AgentState(TypedDict):
     analysis_type: str # 'chat', 'tech_summary', 'non_tech_summary', 'architecture', 'system_design', 'security_scan', 'code_analysis', 'complexity_analysis'
 
 def create_workflow():
-    from backend.agents.nodes import (
+    from agents.nodes import (
         intent_detection_node,
         retrieval_node,
         chat_node,
