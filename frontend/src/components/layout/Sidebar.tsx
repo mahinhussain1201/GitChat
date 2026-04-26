@@ -1,8 +1,7 @@
 import React from 'react';
 import {
   IconDoc, IconBriefcase, IconArch, IconShield, IconCode,
-  IconChart, IconArrowLeft, IconChevronDown, IconChevronUp,
-  IconMenu, IconX,
+  IconChart, IconArrowLeft, IconX,
 } from '../icons';
 import HealthBreakup from '../health/HealthBreakup';
 
