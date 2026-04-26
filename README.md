@@ -1,3 +1,13 @@
+---
+title: RepoMind
+emoji: 🤖
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_file: app.py
+pinned: false
+---
+
 <div align="center">
 
 # RepoMind
