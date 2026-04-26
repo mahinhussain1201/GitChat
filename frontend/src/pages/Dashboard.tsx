@@ -5,6 +5,7 @@ import ChatMessage from '../components/chat/ChatMessage';
 import ChatInput from '../components/chat/ChatInput';
 import EmptyState from '../components/chat/EmptyState';
 import { repoService } from '../services/api';
+import { API_BASE_URL } from '../config';
 
 interface DashboardProps {
   repoUrl: string;
@@ -89,7 +90,7 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl, complexityData }) => {
     setIsChatting(true);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/chat-stream', {
+      const response = await fetch(`${API_BASE_URL}/chat-stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ repo_url: repoUrl, message: userMsg }),
