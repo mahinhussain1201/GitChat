@@ -1,6 +1,9 @@
 # Use official Python runtime as a parent image
 FROM python:3.10-slim
 
+# Install system dependencies (git is required for GitPython)
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
 # Create a non-root user (Hugging Face Spaces requirement)
 RUN useradd -m -u 1000 user
 USER user
