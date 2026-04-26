@@ -2,7 +2,7 @@ import os
 import ast
 import math
 import re
-from collections import Counter, defaultdict
+from collections import Counter
 
 SUPPORTED_EXTENSIONS = {
     ".py", ".js", ".jsx", ".ts", ".tsx", ".java", ".cpp", ".c", ".cs", 

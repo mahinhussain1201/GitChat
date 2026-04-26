@@ -2,7 +2,6 @@ from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional
 import uvicorn
 from backend.services.repo_service import RepoService
 from backend.services.chat_service import ChatService

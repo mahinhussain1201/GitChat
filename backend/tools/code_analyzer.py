@@ -1,6 +1,5 @@
 import os
 import re
-import json
 
 class CodeAnalyzer:
     def __init__(self, repo_path: str):

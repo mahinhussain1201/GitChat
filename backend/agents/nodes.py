@@ -1,7 +1,7 @@
 from langchain_groq import ChatGroq
 from backend.app.config import settings
 from backend.embeddings.vector_store import vector_store
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import AIMessage
 import json
 
 llm = ChatGroq(api_key=settings.GROQ_API_KEY, model_name=settings.LLM_MODEL_NAME, streaming=True)
