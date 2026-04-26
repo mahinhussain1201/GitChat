@@ -1,7 +1,13 @@
 import os
 import ast
 import math
+import re
 from collections import Counter, defaultdict
+
+SUPPORTED_EXTENSIONS = {
+    ".py", ".js", ".jsx", ".ts", ".tsx", ".java", ".cpp", ".c", ".cs", 
+    ".go", ".rb", ".php", ".swift", ".kt", ".rs"
+}
 
 class ComplexityVisitor(ast.NodeVisitor):
     def __init__(self):
@@ -43,12 +49,17 @@ class ProductionComplexityAnalyzer:
                 continue
 
             for file in files:
-                if file.endswith(".py"):
+                ext = os.path.splitext(file)[1].lower()
+                if ext in SUPPORTED_EXTENSIONS:
                     self.total_files += 1
                     file_path = os.path.join(root, file)
                     rel_path = os.path.relpath(file_path, self.repo_path)
 
-                    metrics = self._analyze_python_file(file_path, rel_path)
+                    if ext == ".py":
+                        metrics = self._analyze_python_file(file_path, rel_path)
+                    else:
+                        metrics = self._analyze_generic_file(file_path, rel_path)
+
                     if metrics:
                         self.parsed_files += 1
                         self.file_metrics.append(metrics)
@@ -91,6 +102,59 @@ class ProductionComplexityAnalyzer:
                 "code_smells": code_smells
             }
 
+        except Exception:
+            return None
+
+    def _analyze_generic_file(self, file_path, rel_path):
+        try:
+            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                content = f.read()
+
+            lines = content.splitlines()
+            loc = len(lines)
+            if loc == 0:
+                return None
+
+            keywords = r'\b(if|else|for|while|switch|case|catch)\b'
+            complexity_matches = len(re.findall(keywords, content))
+            est_cyclomatic = 1 + complexity_matches
+            
+            func_keywords = r'\b(function|def|func|class)\b|=>'
+            func_matches = len(re.findall(func_keywords, content))
+            func_count = max(1, func_matches)
+            
+            avg_complexity = est_cyclomatic / func_count
+            
+            duplication = self._detect_duplication(lines)
+            halstead = self._halstead_estimate(content)
+            maintainability = self._maintainability_index(loc, avg_complexity, halstead)
+
+            code_smells = []
+            if loc > 1000:
+                code_smells.append("Large file")
+            if est_cyclomatic > 50:
+                code_smells.append("High file complexity")
+            
+            pseudo_function = {
+                "name": "<generic_scope>",
+                "file": rel_path,
+                "cyclomatic": est_cyclomatic,
+                "loc": loc,
+                "nesting": self._calculate_nesting(lines),
+                "complexity": est_cyclomatic,
+                "why": "Heuristic estimate"
+            }
+            self.functions.append(pseudo_function)
+
+            return {
+                "file": rel_path,
+                "loc": loc,
+                "avg_cyclomatic": avg_complexity,
+                "duplication": duplication,
+                "maintainability": maintainability,
+                "functions": [pseudo_function],
+                "code_smells": code_smells
+            }
         except Exception:
             return None
 
@@ -209,28 +273,29 @@ class ProductionComplexityAnalyzer:
         }
 
     def _compute_final_score(self, complexity, maintainability, loc):
-        score = (
+        complexity_score = (
             min(100, complexity * 5) * 0.4 +
             (100 - maintainability) * 0.4 +
             min(100, loc / 10) * 0.2
         )
-        return int(max(0, min(100, score)))
+        health_score = 100 - complexity_score
+        return int(max(0, min(100, health_score)))
 
     def _grade(self, score):
-        if score < 20: return "A"
-        if score < 40: return "B"
-        if score < 60: return "C"
-        if score < 80: return "D"
+        if score >= 80: return "A"
+        if score >= 60: return "B"
+        if score >= 40: return "C"
+        if score >= 20: return "D"
         return "F"
 
     def _risk_level(self, score):
-        if score < 30: return "Low"
-        if score < 60: return "Moderate"
+        if score >= 70: return "Low"
+        if score >= 40: return "Moderate"
         return "High"
 
     def _empty_response(self):
         return {
-            "final_score": 0,
+            "final_score": 100,
             "grade": "N/A",
             "risk_level": "Unknown",
             "confidence": 0,

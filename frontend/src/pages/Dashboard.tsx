@@ -202,7 +202,7 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl, complexityData }) => {
                   />
                 </svg>
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 700 }}>
-                  {complexityData?.final_score || 0}
+                  {complexityData?.grade === 'N/A' ? 'N/A' : (complexityData?.final_score || 0)}
                 </div>
               </div>
               <div style={{ flex: 1 }}>
@@ -216,27 +216,24 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl, complexityData }) => {
                  {[
                    { 
                      label: 'Logic Flow', 
-                     value: complexityData?.metrics?.avg_cyclomatic ? Math.max(0, Math.min(100, 110 - (complexityData.metrics.avg_cyclomatic * 10))) : 0,
-                     display: `${Math.round(Math.max(0, Math.min(100, 110 - (complexityData.metrics.avg_cyclomatic * 10))))}%`
+                     value: typeof complexityData?.metrics?.avg_cyclomatic === 'number' ? Math.round(Math.max(0, Math.min(100, 110 - (complexityData.metrics.avg_cyclomatic * 10)))) : 0
                    },
                    { 
                      label: 'Structural', 
-                     value: complexityData?.metrics?.maintainability || 0,
-                     display: `${complexityData?.metrics?.maintainability || 0}%`
+                     value: typeof complexityData?.metrics?.maintainability === 'number' ? Math.round(complexityData.metrics.maintainability) : 0
                    },
                    { 
                      label: 'Density', 
-                     value: complexityData?.metrics?.avg_loc ? Math.max(0, Math.min(100, 110 - (complexityData.metrics.avg_loc / 5))) : 0,
-                     display: `${Math.round(Math.max(0, Math.min(100, 110 - (complexityData.metrics.avg_loc / 5))))}%`
+                     value: typeof complexityData?.metrics?.avg_loc === 'number' ? Math.round(Math.max(0, Math.min(100, 110 - (complexityData.metrics.avg_loc / 5)))) : 0
                    }
                  ].map(item => (
                    <div key={item.label}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '4px' }}>
                         <span>{item.label}</span>
-                        <span style={{ color: 'var(--text-secondary)' }}>{item.display}</span>
+                        <span style={{ color: 'var(--text-secondary)' }}>{item.value}%</span>
                       </div>
                       <div style={{ height: '4px', background: 'var(--border)', borderRadius: '2px' }}>
-                        <div style={{ width: `${item.value || 0}%`, height: '100%', background: getScoreColor(item.value || 0), borderRadius: '2px' }} />
+                        <div style={{ width: `${item.value}%`, height: '100%', background: getScoreColor(item.value), borderRadius: '2px' }} />
                       </div>
                    </div>
                  ))}
@@ -468,27 +465,37 @@ const Dashboard: React.FC<DashboardProps> = ({ repoUrl, complexityData }) => {
                             components={{
                               code({ node, className, children, ...props }: any) {
                                 const match = /language-(\w+)/.exec(className || '');
-                                return (
-                                  <div style={{ position: 'relative', margin: '2rem 0' }}>
-                                    <div style={{ 
-                                      background: '#0b0f1a', 
-                                      padding: '1.5rem', 
-                                      borderRadius: '16px', 
-                                      overflowX: 'auto',
-                                      fontSize: '0.9rem',
-                                      border: '1px solid rgba(255,255,255,0.06)',
-                                      boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
-                                    }}>
-                                      <code className={className} {...props} style={{ background: 'transparent', padding: 0 }}>
-                                        {children}
-                                      </code>
+                                const isInline = !match && !String(children).includes('\n');
+                                
+                                if (!isInline) {
+                                  return (
+                                    <div style={{ position: 'relative', margin: '2rem 0' }}>
+                                      <div style={{ 
+                                        background: '#0b0f1a', 
+                                        padding: '1.5rem', 
+                                        borderRadius: '16px', 
+                                        overflowX: 'auto',
+                                        fontSize: '0.9rem',
+                                        border: '1px solid rgba(255,255,255,0.06)',
+                                        boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
+                                      }}>
+                                        <code className={className} {...props} style={{ background: 'transparent', padding: 0 }}>
+                                          {children}
+                                        </code>
+                                      </div>
+                                      {match && (
+                                         <div style={{ position: 'absolute', top: '-12px', right: '16px', background: 'var(--primary)', color: 'white', fontSize: '0.75rem', padding: '4px 12px', borderRadius: '8px', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.05em' }}>
+                                           {match[1]}
+                                         </div>
+                                      )}
                                     </div>
-                                    {match && (
-                                       <div style={{ position: 'absolute', top: '-12px', right: '16px', background: 'var(--primary)', color: 'white', fontSize: '0.75rem', padding: '4px 12px', borderRadius: '8px', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.05em' }}>
-                                         {match[1]}
-                                       </div>
-                                    )}
-                                  </div>
+                                  );
+                                }
+
+                                return (
+                                  <code className={className} {...props} style={{ background: 'rgba(255,255,255,0.1)', padding: '0.2rem 0.4rem', borderRadius: '6px', fontSize: '0.85em', color: '#e2e8f0' }}>
+                                    {children}
+                                  </code>
                                 );
                               }
                             }}
