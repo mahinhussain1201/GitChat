@@ -16,7 +16,13 @@ const UrlForm: React.FC<UrlFormProps> = ({ onAnalyze, isMobile }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (url.trim()) onAnalyze(url.trim());
+    let trimmed = url.trim();
+    if (trimmed) {
+      if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+        trimmed = `https://${trimmed}`;
+      }
+      onAnalyze(trimmed);
+    }
   };
 
   return (
@@ -40,7 +46,7 @@ const UrlForm: React.FC<UrlFormProps> = ({ onAnalyze, isMobile }) => {
         onBlur={e  => (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-strong)'}
       >
         <input
-          type="url"
+          type="text"
           placeholder="https://github.com/owner/repository"
           value={url}
           onChange={e => setUrl(e.target.value)}

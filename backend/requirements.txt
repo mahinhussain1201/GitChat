@@ -8,6 +8,7 @@ langchain-groq
 langgraph
 sentence-transformers
 chromadb
+onnxruntime
 httpx
 langchain-text-splitters
 python-multipart

@@ -42,7 +42,7 @@ async def analyze_repo(request: RepoRequest, background_tasks: BackgroundTasks):
     except Exception as e:
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/chat")
 async def chat(request: ChatRequest):
@@ -50,7 +50,9 @@ async def chat(request: ChatRequest):
         response = await chat_service.chat(request.repo_url, request.message)
         return {"status": "success", "response": response}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/chat-stream")
 async def chat_stream(request: ChatRequest):
@@ -67,7 +69,7 @@ async def chat_stream(request: ChatRequest):
     except Exception as e:
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/tech-summary")
 async def tech_summary(request: RepoRequest):
@@ -75,7 +77,9 @@ async def tech_summary(request: RepoRequest):
         response = await chat_service.get_summary(request.repo_url, type="technical")
         return {"status": "success", "summary": response}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/non-tech-summary")
 async def non_tech_summary(request: RepoRequest):
@@ -83,7 +87,9 @@ async def non_tech_summary(request: RepoRequest):
         response = await chat_service.get_summary(request.repo_url, type="business")
         return {"status": "success", "summary": response}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/architecture")
 async def architecture(request: RepoRequest):
@@ -91,7 +97,9 @@ async def architecture(request: RepoRequest):
         response = await chat_service.get_architecture(request.repo_url)
         return {"status": "success", "architecture": response}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/system-design")
 async def system_design(request: RepoRequest):
@@ -99,7 +107,9 @@ async def system_design(request: RepoRequest):
         response = await chat_service.get_system_design(request.repo_url)
         return {"status": "success", "system_design": response}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/security-scan")
 async def security_scan(request: RepoRequest):
@@ -107,7 +117,9 @@ async def security_scan(request: RepoRequest):
         response = await chat_service.get_security_scan(request.repo_url)
         return {"status": "success", "security_scan": response}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/code-analysis")
 async def code_analysis(request: RepoRequest):
@@ -115,7 +127,9 @@ async def code_analysis(request: RepoRequest):
         response = await chat_service.get_code_analysis(request.repo_url)
         return {"status": "success", "code_analysis": response}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/complexity-analysis")
 async def complexity_analysis(request: RepoRequest):
@@ -123,7 +137,9 @@ async def complexity_analysis(request: RepoRequest):
         response = await chat_service.get_complexity_analysis(request.repo_url)
         return {"status": "success", "complexity_analysis": response}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=400, detail=str(e))
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -7,8 +7,10 @@ IGNORE_DIRS = {
 }
 
 ALLOWED_EXTENSIONS = {
-    '.py', '.js', '.ts', '.jsx', '.tsx', '.java', '.cpp', '.c', 
-    '.go', '.rs', '.json', '.yaml', '.yml', '.md', '.sql', 'Dockerfile'
+    '.py', '.js', '.ts', '.jsx', '.tsx', '.java', '.cpp', '.c', '.h', '.hpp',
+    '.go', '.rs', '.json', '.yaml', '.yml', '.md', '.sql', '.html', '.css',
+    '.sh', '.bash', '.zsh', '.kt', '.cs', '.php', '.rb', '.swift', '.m', '.mm',
+    '.dockerfile', '.toml', '.env', '.xml', '.gradle', 'dockerfile'
 }
 
 def should_ignore(path: str) -> bool:
@@ -18,11 +20,14 @@ def should_ignore(path: str) -> bool:
     return False
 
 def is_allowed_file(filename: str) -> bool:
-    if filename.startswith('.'):
-        return filename == 'Dockerfile' or filename.endswith(('.yml', '.yaml', '.json'))
-    if filename.endswith(('.min.js', '.min.css')):
+    lower_name = filename.lower()
+    if lower_name.startswith('.'):
+        return lower_name == 'dockerfile' or lower_name.endswith(('.yml', '.yaml', '.json', '.toml', '.env'))
+    if lower_name.endswith(('.min.js', '.min.css', '.map', '.lock')):
         return False
-    ext = os.path.splitext(filename)[1].lower()
+    if lower_name == 'dockerfile':
+        return True
+    ext = os.path.splitext(lower_name)[1]
     return ext in ALLOWED_EXTENSIONS
 
 def filter_files(repo_path: str):
