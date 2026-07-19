@@ -21,6 +21,17 @@ const UrlForm: React.FC<UrlFormProps> = ({ onAnalyze, isMobile }) => {
       if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
         trimmed = `https://${trimmed}`;
       }
+      try {
+        const u = new URL(trimmed);
+        const parts = u.pathname.split('/').filter(Boolean);
+        if (parts.length >= 2) {
+          const owner = parts[0];
+          const repo = parts[1].replace(/\.git$/, '');
+          trimmed = `${u.protocol}//${u.host}/${owner}/${repo}`;
+        }
+      } catch (err) {
+        trimmed = trimmed.split('?')[0].split('#')[0];
+      }
       onAnalyze(trimmed);
     }
   };

@@ -4,10 +4,30 @@ import shutil
 import hashlib
 from app.config import settings
 
+from urllib.parse import urlparse
+
 def normalize_repo_url(url: str) -> str:
     url = url.strip()
     if not url.startswith(("http://", "https://")):
         url = f"https://{url}"
+    
+    try:
+        parsed = urlparse(url)
+        parts = [p for p in parsed.path.split("/") if p]
+        if len(parts) >= 2:
+            owner = parts[0]
+            repo = parts[1]
+            if repo.endswith(".git"):
+                repo = repo[:-4]
+            return f"{parsed.scheme}://{parsed.netloc}/{owner}/{repo}"
+    except Exception:
+        pass
+
+    # Fallback basic cleanup
+    if "?" in url:
+        url = url.split("?")[0]
+    if "#" in url:
+        url = url.split("#")[0]
     if url.endswith("/"):
         url = url[:-1]
     return url
